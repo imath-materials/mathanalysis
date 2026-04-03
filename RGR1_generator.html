@@ -1,0 +1,555 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Генератор вариантов РГР по математическому анализу</title>
+
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['\\(','\\)'], ['$', '$']],
+    displayMath: [['\\[','\\]'], ['$$','$$']]
+  },
+  svg: { fontCache: 'global' },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+<style>
+  :root{
+    --paper:#fffefc;
+    --bg:#f4f1ea;
+    --ink:#22201d;
+    --muted:#6d655c;
+    --line:#d8d1c6;
+    --soft:#f8f5ee;
+    --soft2:#fbfaf7;
+    --accent:#f1ece1;
+    --accent2:#e9e2d3;
+    --btn:#2d2a26;
+    --btnText:#ffffff;
+    --shadow:0 10px 35px rgba(75,60,35,.10);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:
+      radial-gradient(circle at top, rgba(255,255,255,.9), rgba(255,255,255,0) 35%),
+      linear-gradient(180deg, #f6f3ed 0%, #eee8dc 100%);
+    color:var(--ink);
+    font-family:"Latin Modern Roman","CMU Serif","Computer Modern Serif","STIX Two Text","Times New Roman",serif;
+    line-height:1.55;
+  }
+  main{
+    max-width:1080px;
+    margin:36px auto;
+    padding:0 18px;
+  }
+  .paper{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:22px;
+    box-shadow:var(--shadow);
+    overflow:hidden;
+  }
+  .hero{
+    padding:34px 34px 22px;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.9), rgba(248,245,238,.96)),
+      repeating-linear-gradient(0deg, rgba(0,0,0,0.018), rgba(0,0,0,0.018) 1px, transparent 1px, transparent 31px);
+    border-bottom:1px solid var(--line);
+  }
+  .sup{
+    font-size:13px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin-bottom:10px;
+  }
+  h1{
+    margin:0 0 10px;
+    font-size:35px;
+    line-height:1.15;
+    font-weight:700;
+  }
+  .lead{
+    margin:0;
+    max-width:900px;
+    color:#433e37;
+    font-size:17px;
+  }
+  .toolbar{
+    display:grid;
+    grid-template-columns:minmax(230px,360px) auto auto;
+    gap:12px;
+    padding:22px 34px;
+    background:var(--soft);
+    border-bottom:1px solid var(--line);
+    align-items:end;
+  }
+  label{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    font-size:14px;
+    color:var(--muted);
+  }
+  input{
+    width:100%;
+    padding:13px 14px;
+    border:1px solid #bfb5a5;
+    border-radius:12px;
+    background:#fffefa;
+    color:var(--ink);
+    font-size:18px;
+    font-family:"Latin Modern Roman","CMU Serif","Computer Modern Serif","STIX Two Text","Times New Roman",serif;
+  }
+  input:focus{
+    outline:none;
+    border-color:#8f8065;
+    box-shadow:0 0 0 3px rgba(143,128,101,.14);
+  }
+  .btn{
+    appearance:none;
+    border:1px solid var(--btn);
+    background:var(--btn);
+    color:var(--btnText);
+    padding:12px 16px;
+    border-radius:12px;
+    cursor:pointer;
+    font-size:15px;
+    font-weight:700;
+    font-family:inherit;
+  }
+  .btn.secondary{
+    background:#fffdfa;
+    color:var(--ink);
+    border-color:#bfb5a5;
+  }
+  .content{
+    padding:28px 34px 34px;
+  }
+  .badge{
+    display:inline-block;
+    padding:8px 14px;
+    border:1px solid var(--line);
+    background:var(--accent);
+    border-radius:999px;
+    font-size:14px;
+    font-weight:700;
+    margin-bottom:16px;
+  }
+  .section{
+    margin-top:26px;
+    border:1px solid var(--line);
+    border-radius:18px;
+    overflow:hidden;
+    background:#fffdfa;
+  }
+  .sectionHead{
+    padding:16px 18px;
+    background:linear-gradient(180deg, var(--soft2), var(--accent));
+    border-bottom:1px solid var(--line);
+  }
+  .sectionHead h2{
+    margin:0 0 4px;
+    font-size:24px;
+    font-weight:700;
+  }
+  .sectionHead p{
+    margin:0;
+    color:var(--muted);
+    font-size:14px;
+  }
+  .sectionBody{padding:18px}
+  .meta{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:12px;
+  }
+  .metaCard{
+    background:var(--soft2);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:14px 15px;
+  }
+  .metaCard .k{
+    font-size:12px;
+    color:var(--muted);
+    margin-bottom:8px;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+  }
+  .metaCard .v{
+    font-size:17px;
+    font-weight:700;
+  }
+  .grid2{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+  }
+  .card{
+    border:1px solid var(--line);
+    border-radius:16px;
+    background:#fff;
+    overflow:hidden;
+  }
+  .cardHead{
+    padding:12px 15px;
+    background:var(--soft);
+    border-bottom:1px solid var(--line);
+    font-size:18px;
+    font-weight:700;
+  }
+  .cardBody{padding:16px}
+  .formulaBlock{
+    margin-top:10px;
+    padding:12px 14px;
+    border:1px solid var(--line);
+    border-radius:14px;
+    background:var(--accent);
+    overflow-x:auto;
+  }
+  .subtle{
+    margin-top:10px;
+    color:var(--muted);
+    font-size:14px;
+  }
+  .checklist{
+    margin:0;
+    padding-left:22px;
+  }
+  .checklist li{margin:7px 0}
+  .footerNote{
+    margin-top:18px;
+    font-size:14px;
+    color:var(--muted);
+  }
+  .math-display{
+    margin:10px 0 4px;
+    overflow-x:auto;
+  }
+  .latex{
+    font-family:"Latin Modern Roman","CMU Serif","Computer Modern Serif","STIX Two Text","Times New Roman",serif;
+  }
+  .small{
+    font-size:14px;
+    color:var(--muted);
+  }
+  @media (max-width:920px){
+    .toolbar{grid-template-columns:1fr 1fr}
+    .toolbar label{grid-column:1/-1}
+    .grid2{grid-template-columns:1fr}
+  }
+  @media (max-width:560px){
+    main{margin:16px auto}
+    .hero,.toolbar,.content{padding-left:18px;padding-right:18px}
+    h1{font-size:28px}
+  }
+</style>
+</head>
+<body>
+<main>
+  <div class="paper latex">
+    <section class="hero">
+      <div class="sup">Национальный исследовательский университет ИТМО</div>
+      <h1>Генератор вариантов РГР по математическому анализу</h1>
+      <p class="lead">
+        Генератор формирует <strong>одну РГР</strong>, внутри которой находятся
+        <strong>две лабораторные работы</strong>:
+        ЛР №1 по геометрическим приложениям определённого интеграла и ЛР №2 по несобственным интегралам.
+        Вариант однозначно определяется по 6-значному номеру ИСУ.
+      </p>
+    </section>
+
+    <section class="toolbar">
+      <label>Номер ИСУ
+        <input id="isu" type="text" inputmode="numeric" maxlength="6" placeholder="Введите 6 цифр"/>
+      </label>
+      <button id="runBtn" class="btn">Показать вариант</button>
+      <button id="copyBtn" class="btn secondary">Скопировать ссылку</button>
+    </section>
+
+    <section class="content">
+      <div id="card" hidden>
+        <div id="titleVariant" class="badge"></div>
+
+        <div class="section">
+          <div class="sectionHead">
+            <h2>Параметры варианта</h2>
+            <p>Один и тот же ИСУ задаёт оба набора заданий внутри одной РГР.</p>
+          </div>
+          <div class="sectionBody">
+            <div id="meta" class="meta"></div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="sectionHead">
+            <h2>Лабораторная работа №1</h2>
+            <p>Геометрические приложения определённого интеграла: площадь, длина дуги, объём вращения.</p>
+          </div>
+          <div class="sectionBody">
+            <div class="grid2">
+              <div class="card">
+                <div class="cardHead">Блок S. Площадь</div>
+                <div id="lab1S" class="cardBody"></div>
+              </div>
+              <div class="card">
+                <div class="cardHead">Блок L. Длина дуги</div>
+                <div id="lab1L" class="cardBody"></div>
+              </div>
+            </div>
+            <div class="card" style="margin-top:16px">
+              <div class="cardHead">Блок V. Объём тела вращения</div>
+              <div id="lab1V" class="cardBody"></div>
+            </div>
+            <div class="footerNote">
+              В отчёте по ЛР №1 рекомендуется показать рисунок объекта, аналитическое решение,
+              численную проверку и небольшое исследование зависимости результата от параметров.
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="sectionHead">
+            <h2>Лабораторная работа №2</h2>
+            <p>Несобственные интегралы: сходимость, усечённые интегралы, осциллирующие примеры.</p>
+          </div>
+          <div class="sectionBody">
+            <div class="grid2">
+              <div class="card">
+                <div class="cardHead">Интеграл \(I_1\)</div>
+                <div id="lab2A" class="cardBody"></div>
+              </div>
+              <div class="card">
+                <div class="cardHead">Интеграл \(I_2\)</div>
+                <div id="lab2B" class="cardBody"></div>
+              </div>
+            </div>
+            <div class="grid2" style="margin-top:16px">
+              <div class="card">
+                <div class="cardHead">Интеграл \(I_3\)</div>
+                <div id="lab2C" class="cardBody"></div>
+              </div>
+              <div class="card">
+                <div class="cardHead">Семейство \(J_p\)</div>
+                <div id="lab2D" class="cardBody"></div>
+              </div>
+            </div>
+            <div class="footerNote">
+              В отчёте по ЛР №2 рекомендуется отдельно показать аналитическое исследование
+              и графики усечённых интегралов \(I(\varepsilon)\) или \(I(R)\).
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<script>
+const alphaVals = ['1/3','1/2','2/3','3/4','1','5/4'];
+const betaVals  = ['1/2','2/3','3/4','1','5/4','3/2'];
+const gammaVals = ['1/2','2/3','3/4','1','5/4','3/2'];
+
+function mod(a,b){ return ((a % b) + b) % b; }
+
+function parseISU(raw){
+  const s = String(raw || '').replace(/\D/g,'');
+  if(!/^\d{6}$/.test(s)) return null;
+  return s.split('').map(x => Number(x));
+}
+
+function metaCards(obj){
+  return Object.entries(obj).map(([k,v]) => `
+    <div class="metaCard">
+      <div class="k">${k}</div>
+      <div class="v">\(${v}\)</div>
+    </div>
+  `).join('');
+}
+
+function blockWrap(title, formula, note=''){
+  return `
+    <div><strong>${title}</strong></div>
+    <div class="formulaBlock math-display">\\[ ${formula} \\]</div>
+    ${note ? `<div class="subtle">${note}</div>` : ''}
+  `;
+}
+
+function lab1Area(S,a,m){
+  if(S===1){
+    return `
+      ${blockWrap('Шаблон S = 1.', String.raw`y = \frac{${a}}{1+x^2}, \qquad y = \frac{${a}x^2}{2}.`, 'Найти площадь фигуры, ограниченной графиками. Полезно использовать симметрию.')}
+    `;
+  }
+  if(S===2){
+    return `
+      ${blockWrap('Шаблон S = 2.', String.raw`\rho = ${a}\sin(${m}\varphi), \qquad \varphi \in \left[0,\frac{\pi}{${m}}\right].`, 'Найти площадь одного лепестка. Рекомендуется формула площади в полярных координатах.')}
+    `;
+  }
+  if(S===3){
+    return `
+      ${blockWrap('Шаблон S = 3.', String.raw`x = ${a}(t-\sin t), \qquad y = ${a}(1-\cos t), \qquad t \in [0,2\pi].`, 'Найти площадь под одной аркой циклоиды. Рекомендуется параметрическая формула площади.')}
+    `;
+  }
+  return `
+    ${blockWrap('Шаблон S = 4.', String.raw`x = ${a}\cos^3 t, \qquad y = ${a}\sin^3 t, \qquad t \in [0,2\pi].`, 'Найти площадь фигуры, ограниченной астроидой. Удобно использовать симметрию.')}
+  `;
+}
+
+function lab1Length(L,b){
+  if(L===1){
+    return `
+      ${blockWrap('Шаблон L = 1.', String.raw`y = \frac{x^2}{4\cdot ${b}} - \frac{${b}}{2}\ln x, \qquad x \in [${b},${2*b}].`, 'Найти длину графика. Стоит упростить выражение под корнем в формуле длины дуги.')}
+    `;
+  }
+  if(L===2){
+    return `
+      ${blockWrap('Шаблон L = 2.', String.raw`x = ${b}\cos^3 t, \qquad y = ${b}\sin^3 t, \qquad t \in \left[0,\frac{\pi}{2}\right].`, 'Найти длину дуги. Это одна четверть астроиды.')}
+    `;
+  }
+  if(L===3){
+    return `
+      ${blockWrap('Шаблон L = 3.', String.raw`\rho = ${b}(1-\cos\varphi), \qquad \varphi \in [0,2\pi].`, 'Найти длину кривой. Рекомендуется полярная формула длины дуги.')}
+    `;
+  }
+  return `
+    ${blockWrap('Шаблон L = 4.', String.raw`x = ${b}(t-\sin t), \qquad y = ${b}(1-\cos t), \qquad t \in [0,2\pi].`, 'Найти длину одной арки циклоиды. После вычисления производных полезно вынести общий множитель.')}
+  `;
+}
+
+function lab1Volume(V,c){
+  if(V===1){
+    return `
+      ${blockWrap('Шаблон V = 1.', String.raw`y = ${c}\sqrt{x}, \qquad y = ${c}x^2, \qquad x \in [0,1].`, 'Найти объём тела, полученного вращением вокруг оси Ox. Удобен метод шайб.')}
+    `;
+  }
+  if(V===2){
+    return `
+      ${blockWrap('Шаблон V = 2.', String.raw`x = ${c}y, \qquad x = ${c}\sqrt{y}, \qquad y \in [0,1].`, String.raw`Найти объём тела, полученного вращением вокруг оси Oy. Удобно интегрировать по \(y\).`)}
+    `;
+  }
+  if(V===3){
+    return `
+      ${blockWrap('Шаблон V = 3.', String.raw`y = ${c}(1-x^2), \qquad x \in [-1,1], \qquad y \ge 0.`, 'Найти объём тела, полученного вращением вокруг оси Ox. Внутреннего радиуса нет.')}
+    `;
+  }
+  return `
+    ${blockWrap('Шаблон V = 4.', String.raw`x = ${c}(1-y^2), \qquad y \in [-1,1], \qquad x \ge 0.`, 'Найти объём тела, полученного вращением вокруг оси Oy. Внутреннего радиуса нет.')}
+  `;
+}
+
+function lab2A(A,alpha){
+  if(A===1) return blockWrap('Шаблон A = 1.', String.raw`I_1 = \int_0^1 \frac{dx}{x^{${alpha}}}.`, 'Исследовать сходимость и поведение усечённого интеграла.');
+  if(A===2) return blockWrap('Шаблон A = 2.', String.raw`I_1 = \int_0^1 \frac{dx}{x^{${alpha}}(1+x^2)}.`, 'Сравнить с эталонным интегралом около нуля.');
+  if(A===3) return blockWrap('Шаблон A = 3.', String.raw`I_1 = \int_0^1 \frac{dx}{e^{x^{${alpha}}}-1}.`, String.raw`Полезно изучить эквивалентность знаменателя при \(x\to0+0\).`);
+  return blockWrap('Шаблон A = 4.', String.raw`I_1 = \int_0^1 \frac{dx}{1-\cos(x^{${alpha}})}.`, String.raw`Стоит использовать разложение \(1-\cos u \sim \frac{u^2}{2}\).`);
+}
+
+function lab2B(B,beta){
+  if(B===1) return blockWrap('Шаблон B = 1.', String.raw`I_2 = \int_1^{+\infty} \frac{dx}{x^{${beta}}}.`, 'Сравнить с эталонным степенным интегралом.');
+  if(B===2) return blockWrap('Шаблон B = 2.', String.raw`I_2 = \int_e^{+\infty} \frac{dx}{x(\ln x)^{${beta}}}.`, 'Исследовать сходимость логарифмического эталона.');
+  if(B===3) return blockWrap('Шаблон B = 3.', String.raw`I_2 = \int_1^{+\infty} \frac{dx}{1+x^{${beta}}}.`, String.raw`Сравнить поведение с \(x^{-\beta}\) при \(x\to+\infty\).`);
+  return blockWrap('Шаблон B = 4.', String.raw`I_2 = \int_2^{+\infty} \frac{dx}{x^{${beta}}\sqrt{x+1}}.`, String.raw`Сравнить с подходящим степенным эталоном при \(x\to+\infty\).`);
+}
+
+function lab2C(C,gamma,omega){
+  if(C===1){
+    return blockWrap('Шаблон C = 1.', String.raw`I_3 = \int_1^{+\infty} \frac{\sin(${omega}x)}{x^{${gamma}}}\,dx.`, 'Нужно исследовать обычную, абсолютную и условную сходимость.');
+  }
+  return blockWrap('Шаблон C = 2.', String.raw`I_3 = \int_1^{+\infty} \frac{\cos(${omega}x)}{x^{${gamma}}}\,dx.`, 'Нужно исследовать обычную, абсолютную и условную сходимость.');
+}
+
+function lab2D(D){
+  if(D===1) return blockWrap('Шаблон D = 1.', String.raw`J_p = \int_1^{+\infty} \frac{dx}{x^p}, \qquad p \in \left\{\frac12,1,\frac32\right\}.`, String.raw`Сформулировать общий критерий сходимости по \(p\).`);
+  if(D===2) return blockWrap('Шаблон D = 2.', String.raw`J_p = \int_0^1 \frac{dx}{x^p}, \qquad p \in \left\{\frac12,1,\frac32\right\}.`, String.raw`Сформулировать общий критерий сходимости по \(p\).`);
+  if(D===3) return blockWrap('Шаблон D = 3.', String.raw`J_p = \int_e^{+\infty} \frac{dx}{x(\ln x)^p}, \qquad p \in \left\{\frac12,1,\frac32\right\}.`, String.raw`Полезно отделить граничный случай \(p=1\).`);
+  return blockWrap('Шаблон D = 4.', String.raw`J_p = \int_1^{+\infty} \frac{\sin x}{x^p}\,dx, \qquad p \in \left\{\frac12,1,\frac32\right\}.`, 'Сравнить обычную и абсолютную сходимость для разных \(p\).');
+}
+
+function render(raw){
+  const digits = parseISU(raw);
+  if(!digits){
+    alert('Введите корректный 6-значный номер ИСУ.');
+    return;
+  }
+  const [d1,d2,d3,d4,d5,d6] = digits;
+  const isu = digits.join('');
+
+  const a = 1 + mod(d1,5);
+  const b = 1 + mod(d2,5);
+  const c = 1 + mod(d3,5);
+  const m = 2 + mod(d4,4);
+
+  const S = 1 + mod(d1 + d3 + d5, 4);
+  const L = 1 + mod(d2 + d4 + d6, 4);
+  const V = 1 + mod(d1 + d2 + d3 + d4 + d5 + d6, 4);
+
+  const alpha = alphaVals[mod(d4,6)];
+  const beta  = betaVals[mod(d5,6)];
+  const gamma = gammaVals[mod(d6,6)];
+  const omega = 1 + mod(d1 + d2, 4);
+
+  const A = 1 + mod(d1 + d3, 4);
+  const B = 1 + mod(d2 + d4, 4);
+  const C = 1 + mod(d5 + d6, 2);
+  const D = 1 + mod(d1 + d2 + d3, 4);
+
+  document.getElementById('titleVariant').textContent = 'Вариант для ИСУ ' + isu;
+  document.getElementById('meta').innerHTML = metaCards({
+    'ЛР №1: параметры': String.raw`a = ${a},\quad b = ${b},\quad c = ${c},\quad m = ${m}`,
+    'ЛР №1: шаблоны': String.raw`S = ${S},\quad L = ${L},\quad V = ${V}`,
+    'ЛР №2: показатели': String.raw`\alpha = ${alpha},\quad \beta = ${beta},\quad \gamma = ${gamma},\quad \omega = ${omega}`,
+    'ЛР №2: шаблоны': String.raw`A = ${A},\quad B = ${B},\quad C = ${C},\quad D = ${D}`
+  });
+
+  document.getElementById('lab1S').innerHTML = lab1Area(S,a,m);
+  document.getElementById('lab1L').innerHTML = lab1Length(L,b);
+  document.getElementById('lab1V').innerHTML = lab1Volume(V,c);
+
+  document.getElementById('lab2A').innerHTML = lab2A(A,alpha);
+  document.getElementById('lab2B').innerHTML = lab2B(B,beta);
+  document.getElementById('lab2C').innerHTML = lab2C(C,gamma,omega);
+  document.getElementById('lab2D').innerHTML = lab2D(D);
+
+  document.getElementById('card').hidden = false;
+
+  if(window.MathJax && window.MathJax.typesetPromise){
+    window.MathJax.typesetPromise();
+  }
+
+  const url = new URL(window.location.href);
+  url.searchParams.set('isu', isu);
+  history.replaceState(null, '', url.toString());
+}
+
+document.getElementById('runBtn').addEventListener('click', () => render(document.getElementById('isu').value));
+
+document.getElementById('copyBtn').addEventListener('click', async () => {
+  const url = new URL(window.location.href);
+  const value = document.getElementById('isu').value.replace(/\D/g,'');
+  if(/^\d{6}$/.test(value)) url.searchParams.set('isu', value);
+  try{
+    await navigator.clipboard.writeText(url.toString());
+    alert('Ссылка скопирована.');
+  }catch(e){
+    prompt('Скопируйте ссылку вручную:', url.toString());
+  }
+});
+
+document.getElementById('isu').addEventListener('keydown', (e) => {
+  if(e.key === 'Enter') render(document.getElementById('isu').value);
+});
+
+const initial = new URL(window.location.href).searchParams.get('isu') || '123456';
+document.getElementById('isu').value = initial;
+render(initial);
+</script>
+</body>
+</html>
