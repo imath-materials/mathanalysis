@@ -175,6 +175,7 @@ window.MathJax = {
     border:1px solid var(--line);
     border-radius:14px;
     padding:14px 15px;
+    min-width:0;
   }
   .metaCard .k{
     font-size:12px;
@@ -186,6 +187,11 @@ window.MathJax = {
   .metaCard .v{
     font-size:17px;
     font-weight:700;
+    overflow-x:auto;
+    overflow-y:hidden;
+  }
+  .metaCard .v mjx-container{
+    max-width:100%;
   }
   .grid2{
     display:grid;
@@ -369,7 +375,7 @@ function metaCards(obj){
   return Object.entries(obj).map(([k,v]) => `
     <div class="metaCard">
       <div class="k">${k}</div>
-      <div class="v">\(${v}\)</div>
+      <div class="v">\\(${v}\\)</div>
     </div>
   `).join('');
 }
