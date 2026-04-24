@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Генератор вариантов РГР №2 по математическому анализу</title>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['\\(','\\)'], ['$', '$']],
+    displayMath: [['\\[','\\]'], ['$$','$$']]
+  },
+  svg: { fontCache: 'global' },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+  :root{
+    --paper:#fffefc;
+    --bg:#f4f1ea;
+    --ink:#22201d;
+    --muted:#6d655c;
+    --line:#d8d1c6;
+    --soft:#f8f5ee;
+    --soft2:#fbfaf7;
+    --accent:#f1ece1;
+    --btn:#2d2a26;
+    --btnText:#ffffff;
+    --shadow:0 10px 35px rgba(75,60,35,.10);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:
+      radial-gradient(circle at top, rgba(255,255,255,.92), rgba(255,255,255,0) 35%),
+      linear-gradient(180deg, #f6f3ed 0%, #eee8dc 100%);
+    color:var(--ink);
+    font-family:"Latin Modern Roman","CMU Serif","Computer Modern Serif","STIX Two Text","Times New Roman",serif;
+    line-height:1.55;
+  }
+  main{max-width:1100px;margin:36px auto;padding:0 18px}
+  .paper{background:var(--paper);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);overflow:hidden}
+  .hero{
+    padding:34px 34px 22px;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.93), rgba(248,245,238,.96)),
+      repeating-linear-gradient(0deg, rgba(0,0,0,.018), rgba(0,0,0,.018) 1px, transparent 1px, transparent 31px);
+    border-bottom:1px solid var(--line);
+  }
+  .sup{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+  h1{margin:0 0 10px;font-size:35px;line-height:1.15;font-weight:700}
+  .lead{margin:0;max-width:920px;color:#433e37;font-size:17px}
+  .toolbar{display:grid;grid-template-columns:minmax(230px,360px) auto auto;gap:12px;padding:22px 34px;background:var(--soft);border-bottom:1px solid var(--line);align-items:end}
+  label{display:flex;flex-direction:column;gap:6px;font-size:14px;color:var(--muted)}
+  input{width:100%;padding:13px 14px;border:1px solid #bfb5a5;border-radius:12px;background:#fffefa;color:var(--ink);font-size:18px;font-family:inherit}
+  input:focus{outline:none;border-color:#8f8065;box-shadow:0 0 0 3px rgba(143,128,101,.14)}
+  .btn{appearance:none;border:1px solid var(--btn);background:var(--btn);color:var(--btnText);padding:12px 16px;border-radius:12px;cursor:pointer;font-size:15px;font-weight:700;font-family:inherit;white-space:nowrap}
+  .btn.secondary{background:#fffdfa;color:var(--ink);border-color:#bfb5a5}
+  .content{padding:28px 34px 34px}
+  .badge{display:inline-block;padding:8px 14px;border:1px solid var(--line);background:var(--accent);border-radius:999px;font-size:14px;font-weight:700;margin-bottom:16px}
+  .section{margin-top:26px;border:1px solid var(--line);border-radius:18px;overflow:hidden;background:#fffdfa}
+  .sectionHead{padding:16px 18px;background:linear-gradient(180deg, var(--soft2), var(--accent));border-bottom:1px solid var(--line)}
+  .sectionHead h2{margin:0 0 4px;font-size:24px;font-weight:700}
+  .sectionHead p{margin:0;color:var(--muted);font-size:14px}
+  .sectionBody{padding:18px}
+  .meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+  .metaCard{background:var(--soft2);border:1px solid var(--line);border-radius:14px;padding:14px 15px;min-width:0}
+  .metaCard .k{font-size:12px;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em}
+  .metaCard .v{font-size:17px;font-weight:700;overflow-x:auto;overflow-y:hidden}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .card{border:1px solid var(--line);border-radius:16px;background:#fff;overflow:hidden;min-width:0}
+  .cardHead{padding:12px 15px;background:var(--soft);border-bottom:1px solid var(--line);font-size:18px;font-weight:700}
+  .cardBody{padding:16px}
+  .formulaBlock{margin-top:10px;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:var(--accent);overflow-x:auto}
+  .subtle{margin-top:10px;color:var(--muted);font-size:14px}
+  .math-display{margin:10px 0 4px;overflow-x:auto}
+  @media (max-width:980px){.toolbar{grid-template-columns:1fr 1fr}.toolbar label{grid-column:1/-1}.grid2,.grid3{grid-template-columns:1fr}}
+  @media (max-width:560px){main{margin:16px auto}.hero,.toolbar,.content{padding-left:18px;padding-right:18px}h1{font-size:28px}.toolbar{grid-template-columns:1fr}.btn{width:100%}}
+</style>
+</head>
+<body>
+<main>
+  <div class="paper">
+    <section class="hero">
+      <div class="sup">Национальный исследовательский университет ИТМО</div>
+      <h1>Генератор вариантов РГР №2</h1>
+      <p class="lead">
+        Генератор формирует вариант для работы <strong>«Числовые и функциональные ряды»</strong>:
+        числовые ряды, функциональные и степенные ряды, ряд Тейлора и дополнительную часть по ряду Фурье.
+        Вариант определяется по 6-значному номеру ИСУ.
+      </p>
+    </section>
+
+    <section class="toolbar">
+      <label>Номер ИСУ
+        <input id="isu" type="text" inputmode="numeric" maxlength="6" placeholder="Введите 6 цифр" />
+      </label>
+      <button id="runBtn" class="btn">Показать вариант</button>
+      <button id="copyBtn" class="btn secondary">Скопировать ссылку</button>
+    </section>
+
+    <section class="content">
+      <div id="card">
+        <div id="titleVariant" class="badge">Вариант для ИСУ 123456</div>
+
+        <div class="section">
+          <div class="sectionHead">
+            <h2>Параметры и номера шаблонов</h2>
+            <p>Параметры используются во всех блоках РГР №2.</p>
+          </div>
+          <div class="sectionBody">
+            <div id="meta" class="meta"></div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="sectionHead">
+            <h2>Лабораторная работа №1</h2>
+            <p>Числовые ряды: признаки сходимости, частичные суммы и вычислительный эксперимент.</p>
+          </div>
+          <div class="sectionBody">
+            <div class="grid3">
+              <div class="card"><div class="cardHead">Блок \(S_1\)</div><div id="seriesS1" class="cardBody"></div></div>
+              <div class="card"><div class="cardHead">Блок \(S_2\)</div><div id="seriesS2" class="cardBody"></div></div>
+              <div class="card"><div class="cardHead">Семейство \(S_p\)</div><div id="seriesSp" class="cardBody"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="sectionHead">
+            <h2>Лабораторная работа №2</h2>
+            <p>Функциональные ряды, степенные ряды и разложение в ряд Тейлора.</p>
+          </div>
+          <div class="sectionBody">
+            <div class="grid3">
+              <div class="card"><div class="cardHead">Функциональный ряд \(F(x)\)</div><div id="funcF" class="cardBody"></div></div>
+              <div class="card"><div class="cardHead">Степенной ряд \(P(x)\)</div><div id="powerP" class="cardBody"></div></div>
+              <div class="card"><div class="cardHead">Ряд Тейлора</div><div id="taylorT" class="cardBody"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="sectionHead">
+            <h2>Дополнительная часть</h2>
+            <p>Функция для разложения в ряд Фурье.</p>
+          </div>
+          <div class="sectionBody">
+            <div class="grid2">
+              <div class="card"><div class="cardHead">Ряд Фурье</div><div id="fourierE" class="cardBody"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<script>
+function mod(a,b){ return ((a % b) + b) % b; }
+
+function parseISU(raw){
+  const s = String(raw || '').replace(/\D/g,'');
+  if(!/^\d{6}$/.test(s)) return null;
+  return s.split('').map(x => Number(x));
+}
+
+function metaCards(obj){
+  return Object.entries(obj).map(([k,v]) => `
+    <div class="metaCard">
+      <div class="k">${k}</div>
+      <div class="v">\\(${v}\\)</div>
+    </div>
+  `).join('');
+}
+
+function blockWrap(title, formula, note=''){
+  return `
+    <div><strong>${title}</strong></div>
+    <div class="formulaBlock math-display">\\[ ${formula} \\]</div>
+    ${note ? `<div class="subtle">${note}</div>` : ''}
+  `;
+}
+
+function s1Block(A,a,b,c){
+  if(A===1) return blockWrap('Шаблон A = 1.', String.raw`S_1=\sum_{n=1}^{\infty}\frac{1}{n^{${a}}}.`);
+  if(A===2) return blockWrap('Шаблон A = 2.', String.raw`S_1=\sum_{n=1}^{\infty}\frac{1}{n\left(\ln(n+1)\right)^{${a}}}.`);
+  if(A===3) return blockWrap('Шаблон A = 3.', String.raw`S_1=\sum_{n=1}^{\infty}\frac{n+${a}}{n^2+${b}n+${c}}.`);
+  return blockWrap('Шаблон A = 4.', String.raw`S_1=\sum_{n=1}^{\infty}\frac{${a}^{n}}{n!}.`);
+}
+
+function s2Block(B,b){
+  if(B===1) return blockWrap('Шаблон B = 1.', String.raw`S_2=\sum_{n=1}^{\infty}(-1)^{n+1}\frac{1}{n^{${b}}}.`);
+  if(B===2) return blockWrap('Шаблон B = 2.', String.raw`S_2=\sum_{n=1}^{\infty}(-1)^{n+1}\frac{\ln(n+1)}{n^{${b}}}.`);
+  if(B===3) return blockWrap('Шаблон B = 3.', String.raw`S_2=\sum_{n=1}^{\infty}(-1)^{n+1}\frac{n+${b}}{n^2+1}.`);
+  return blockWrap('Шаблон B = 4.', String.raw`S_2=\sum_{n=1}^{\infty}(-1)^{n+1}\frac{${b}^{n}}{n!}.`);
+}
+
+function spBlock(C,a){
+  const ps = String.raw`p\in\left\{\frac12,1,\frac32\right\}`;
+  if(C===1) return blockWrap('Шаблон C = 1.', String.raw`S_p=\sum_{n=1}^{\infty}\frac{1}{n^p},\qquad ${ps}.`);
+  if(C===2) return blockWrap('Шаблон C = 2.', String.raw`S_p=\sum_{n=2}^{\infty}\frac{1}{n(\ln n)^p},\qquad ${ps}.`);
+  if(C===3) return blockWrap('Шаблон C = 3.', String.raw`S_p=\sum_{n=1}^{\infty}\frac{1}{n^p+${a}},\qquad ${ps}.`);
+  return blockWrap('Шаблон C = 4.', String.raw`S_p=\sum_{n=1}^{\infty}(-1)^{n+1}\frac{1}{n^p},\qquad ${ps}.`);
+}
+
+function fBlock(D,a){
+  if(D===1) return blockWrap('Шаблон D = 1.', String.raw`F(x)=\sum_{n=1}^{\infty}\frac{x^n}{n^{${a}}},\qquad x\in[-1,1].`);
+  if(D===2) return blockWrap('Шаблон D = 2.', String.raw`F(x)=\sum_{n=1}^{\infty}\frac{\sin(nx)}{n^{${a}}},\qquad x\in[0,2\pi].`);
+  if(D===3) return blockWrap('Шаблон D = 3.', String.raw`F(x)=\sum_{n=1}^{\infty}\frac{\cos(nx)}{n^{${a}}},\qquad x\in[0,2\pi].`);
+  return blockWrap('Шаблон D = 4.', String.raw`F(x)=\sum_{n=1}^{\infty}\frac{x^n}{n+${a}},\qquad x\in[-1,1].`);
+}
+
+function pBlock(A,a,b,c){
+  if(A===1) return blockWrap('Шаблон A = 1.', String.raw`P(x)=\sum_{n=1}^{\infty}\frac{(x-${a})^n}{n}.`);
+  if(A===2) return blockWrap('Шаблон A = 2.', String.raw`P(x)=\sum_{n=1}^{\infty}\frac{(x-${a})^n}{n^2}.`);
+  if(A===3) return blockWrap('Шаблон A = 3.', String.raw`P(x)=\sum_{n=1}^{\infty}\frac{(x-${a})^n}{n\cdot ${b}^n}.`);
+  return blockWrap('Шаблон A = 4.', String.raw`P(x)=\sum_{n=0}^{\infty}\frac{(x-${c})^n}{n!}.`);
+}
+
+function tBlock(B,a,b,c,m){
+  if(B===1) return blockWrap('Шаблон B = 1.', String.raw`f(x)=x^{${m}}e^{${a}x}.`, String.raw`Разложение выполняется в точке \(x_0=0\), численный эксперимент на \([-1,1]\).`);
+  if(B===2) return blockWrap('Шаблон B = 2.', String.raw`f(x)=\frac{\sin(${b}x)}{x}.`, String.raw`В точке \(x=0\) значение понимать по непрерывному продолжению; численный эксперимент на \([-2,2]\).`);
+  if(B===3) return blockWrap('Шаблон B = 3.', String.raw`f(x)=x^{${m}}\cos(${c}x).`, String.raw`Разложение выполняется в точке \(x_0=0\), численный эксперимент на \([-1,1]\).`);
+  return blockWrap('Шаблон B = 4.', String.raw`f(x)=\frac{\ln(1+${a}x)}{x}.`, String.raw`В точке \(x=0\) использовать непрерывное продолжение; численный эксперимент на \(\left[-\frac{0.9}{${a}},\frac{1}{${a}}\right]\).`);
+}
+
+function eBlock(E){
+  if(E===1) return blockWrap('Шаблон E = 1.', String.raw`f(x)=x,\qquad x\in[-\pi,\pi].`);
+  if(E===2) return blockWrap('Шаблон E = 2.', String.raw`f(x)=|x|,\qquad x\in[-\pi,\pi].`);
+  return blockWrap('Шаблон E = 3.', String.raw`f(x)=x^2,\qquad x\in[-\pi,\pi].`);
+}
+
+function render(raw){
+  const digits = parseISU(raw);
+  if(!digits){
+    alert('Введите корректный 6-значный номер ИСУ.');
+    return;
+  }
+  const [d1,d2,d3,d4,d5,d6] = digits;
+  const isu = digits.join('');
+
+  const a = 1 + mod(d1,5);
+  const b = 1 + mod(d2,5);
+  const c = 1 + mod(d3,5);
+  const m = 2 + mod(d4,4);
+
+  const A = 1 + mod(d1 + d3 + d5, 4);
+  const B = 1 + mod(d2 + d4 + d6, 4);
+  const C = 1 + mod(d1 + d2 + d3, 4);
+  const D = 1 + mod(d4 + d5 + d6, 4);
+  const E = 1 + mod(d1 + d4 + d6, 3);
+
+  document.getElementById('titleVariant').textContent = 'Вариант для ИСУ ' + isu;
+  document.getElementById('meta').innerHTML = metaCards({
+    'Параметры': String.raw`a=${a},\quad b=${b},\quad c=${c},\quad m=${m}`,
+    'Шаблоны ЛР №1': String.raw`A=${A},\quad B=${B},\quad C=${C}`,
+    'Шаблоны ЛР №2': String.raw`D=${D},\quad A=${A},\quad B=${B}`,
+    'Дополнительная часть': String.raw`E=${E}`
+  });
+
+  document.getElementById('seriesS1').innerHTML = s1Block(A,a,b,c);
+  document.getElementById('seriesS2').innerHTML = s2Block(B,b);
+  document.getElementById('seriesSp').innerHTML = spBlock(C,a);
+  document.getElementById('funcF').innerHTML = fBlock(D,a);
+  document.getElementById('powerP').innerHTML = pBlock(A,a,b,c);
+  document.getElementById('taylorT').innerHTML = tBlock(B,a,b,c,m);
+  document.getElementById('fourierE').innerHTML = eBlock(E);
+
+  if(window.MathJax && window.MathJax.typesetPromise){
+    if(window.MathJax.typesetClear) window.MathJax.typesetClear([document.getElementById('card')]);
+    window.MathJax.typesetPromise([document.getElementById('card')]);
+  }
+
+  const url = new URL(window.location.href);
+  url.searchParams.set('isu', isu);
+  history.replaceState(null, '', url.toString());
+}
+
+document.getElementById('runBtn').addEventListener('click', () => render(document.getElementById('isu').value));
+
+document.getElementById('copyBtn').addEventListener('click', async () => {
+  const url = new URL(window.location.href);
+  const value = document.getElementById('isu').value.replace(/\D/g,'');
+  if(/^\d{6}$/.test(value)) url.searchParams.set('isu', value);
+  try{
+    await navigator.clipboard.writeText(url.toString());
+    alert('Ссылка скопирована.');
+  }catch(e){
+    prompt('Скопируйте ссылку вручную:', url.toString());
+  }
+});
+
+document.getElementById('isu').addEventListener('keydown', (e) => {
+  if(e.key === 'Enter') render(document.getElementById('isu').value);
+});
+
+const initial = new URL(window.location.href).searchParams.get('isu') || '123456';
+document.getElementById('isu').value = initial;
+render(initial);
+</script>
+</body>
+</html>
