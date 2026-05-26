@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>ДЗ 4 по рядам Фурье</title>
+<!-- dz4-fourier-generator build: 2026-05-26-v3 -->
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['\\(','\\)'], ['$', '$']],
+    displayMath: [['\\[','\\]'], ['$$','$$']],
+    processEscapes: true
+  },
+  svg: { fontCache: 'global' },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+};
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+  :root{
+    --paper:#fffefc;
+    --bg:#f4f1ea;
+    --ink:#22201d;
+    --muted:#6d655c;
+    --line:#d8d1c6;
+    --soft:#f8f5ee;
+    --soft2:#fbfaf7;
+    --accent:#f1ece1;
+    --accent2:#e9e2d3;
+    --btn:#2d2a26;
+    --btnText:#ffffff;
+    --warn:#fff5d6;
+    --warnLine:#e8c15f;
+    --shadow:0 10px 35px rgba(75,60,35,.10);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:
+      radial-gradient(circle at top, rgba(255,255,255,.9), rgba(255,255,255,0) 35%),
+      linear-gradient(180deg, #f6f3ed 0%, #eee8dc 100%);
+    color:var(--ink);
+    font-family:"Latin Modern Roman","CMU Serif","Computer Modern Serif","STIX Two Text","Times New Roman",serif;
+    line-height:1.55;
+  }
+  main{max-width:1080px;margin:36px auto;padding:0 18px}
+  .paper{background:var(--paper);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);overflow:hidden}
+  .hero{padding:34px 34px 22px;background:linear-gradient(180deg, rgba(255,255,255,.9), rgba(248,245,238,.96)),repeating-linear-gradient(0deg, rgba(0,0,0,0.018), rgba(0,0,0,0.018) 1px, transparent 1px, transparent 31px);border-bottom:1px solid var(--line)}
+  .sup{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+  h1{margin:0 0 10px;font-size:35px;line-height:1.15;font-weight:700}
+  .lead{margin:0;max-width:930px;color:#433e37;font-size:17px}
+  .toolbar{display:grid;grid-template-columns:minmax(230px,360px) auto auto;gap:12px;padding:22px 34px;background:var(--soft);border-bottom:1px solid var(--line);align-items:end}
+  label{display:flex;flex-direction:column;gap:6px;font-size:14px;color:var(--muted)}
+  input{width:100%;padding:13px 14px;border:1px solid #bfb5a5;border-radius:12px;background:#fffefa;color:var(--ink);font-size:18px;font-family:inherit}
+  input:focus{outline:none;border-color:#8f8065;box-shadow:0 0 0 3px rgba(143,128,101,.14)}
+  .btn{appearance:none;border:1px solid var(--btn);background:var(--btn);color:var(--btnText);padding:12px 16px;border-radius:12px;cursor:pointer;font-size:15px;font-weight:700;font-family:inherit;white-space:nowrap}
+  .btn.secondary{background:#fffdfa;color:var(--ink);border-color:#bfb5a5}
+  .content{padding:28px 34px 34px}
+  .badge{display:inline-block;padding:8px 14px;border:1px solid var(--line);background:var(--accent);border-radius:999px;font-size:14px;font-weight:700;margin-bottom:16px}
+  .section{margin-top:24px;border:1px solid var(--line);border-radius:18px;overflow:hidden;background:#fffdfa}
+  .sectionHead{padding:16px 18px;background:linear-gradient(180deg, var(--soft2), var(--accent));border-bottom:1px solid var(--line)}
+  .sectionHead h2{margin:0 0 4px;font-size:24px;font-weight:700}
+  .sectionHead p{margin:0;color:var(--muted);font-size:14px}
+  .sectionBody{padding:18px}
+  .meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+  .metaCard{background:var(--soft2);border:1px solid var(--line);border-radius:14px;padding:14px 15px;min-width:0}
+  .metaCard .k{font-size:12px;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em}
+  .metaCard .v{font-size:17px;font-weight:700;overflow-x:auto;overflow-y:hidden}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .card{border:1px solid var(--line);border-radius:16px;background:#fff;overflow:hidden}
+  .cardHead{padding:12px 15px;background:var(--soft);border-bottom:1px solid var(--line);font-size:18px;font-weight:700}
+  .cardBody{padding:16px}
+  .formulaBlock{margin:10px 0 6px;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:var(--accent);overflow-x:auto}
+  .taskList{margin:0;padding-left:22px}.taskList li{margin:8px 0}.taskList ul{margin-top:5px}
+  .subtle{margin-top:10px;color:var(--muted);font-size:14px}
+  .note{padding:13px 15px;border-radius:14px;border:1px solid var(--line);background:var(--soft2);margin-top:12px}
+  .warn{background:var(--warn);border-color:var(--warnLine)}
+  table{width:100%;border-collapse:collapse;margin-top:10px;font-size:15px}
+  th,td{border:1px solid var(--line);padding:9px 10px;vertical-align:top}
+  th{background:var(--soft);text-align:left}
+  .latex{font-family:"Latin Modern Roman","CMU Serif","Computer Modern Serif","STIX Two Text","Times New Roman",serif}
+  .error{color:#9a3412;font-weight:700;margin-top:8px;display:none}
+  @media print{
+    body{background:#fff} main{margin:0;max-width:none} .paper{box-shadow:none;border:none;border-radius:0} .toolbar,.noPrint{display:none!important} .content,.hero{padding-left:0;padding-right:0} .section{break-inside:avoid}
+  }
+  @media (max-width:920px){.toolbar{grid-template-columns:1fr 1fr}.toolbar label{grid-column:1/-1}.grid2{grid-template-columns:1fr}}
+  @media (max-width:560px){main{margin:16px auto}.hero,.toolbar,.content{padding-left:18px;padding-right:18px}h1{font-size:28px}.toolbar{grid-template-columns:1fr}.btn{width:100%}}
+</style>
+</head>
+<body>
+<main>
+  <div class="paper latex">
+    <section class="hero">
+      <div class="sup">Математический анализ · ряды Фурье</div>
+      <h1>ДЗ 4: коэффициенты Фурье и восстановление сигнала</h1>
+      <p class="lead">
+        Страница выдаёт индивидуальный вариант по 6-значному номеру ИСУ. Нужно самостоятельно найти коэффициенты Фурье, записать частичную сумму, построить график и сделать короткий вывод о приближении функции рядом Фурье.
+      </p>
+    </section>
+
+    <section class="toolbar noPrint">
+      <label>Номер ИСУ
+        <input id="isu" type="text" inputmode="numeric" maxlength="6" placeholder="Введите 6 цифр" />
+        <span id="err" class="error">Введите ровно 6 цифр.</span>
+      </label>
+      <button id="runBtn" class="btn">Показать вариант</button>
+      <button id="copyBtn" class="btn secondary">Скопировать ссылку</button>
+    </section>
+
+    <section class="content">
+      <div id="card"></div>
+    </section>
+  </div>
+</main>
+
+
+<script>
+function mod(a,b){ return ((a % b) + b) % b; }
+function parseISU(raw){
+  const s = String(raw || '').replace(/\D/g,'');
+  if(!/^\d{6}$/.test(s)) return null;
+  return s.split('').map(x => Number(x));
+}
+function texA(A){ return A === 1 ? '' : String(A); }
+
+const PARTIAL_SUM_N = 4;
+
+const templates = [
+  {
+    name:'Пилообразный сигнал',
+    short:'saw',
+    formula:A=>String.raw`f(x)=${texA(A)}x,\qquad -\pi<x<\pi,\qquad f(x+2\pi)=f(x).`,
+    note:'Типичный пример для тренировки нечётных функций и синусного ряда.'
+  },
+  {
+    name:'Параболический сигнал',
+    short:'x2',
+    formula:A=>String.raw`f(x)=${texA(A)}x^2,\qquad -\pi<x<\pi,\qquad f(x+2\pi)=f(x).`,
+    note:'Функция гладкая внутри периода; удобно сначала определить чётность.'
+  },
+  {
+    name:'Модульный сигнал',
+    short:'abs',
+    formula:A=>String.raw`f(x)=${texA(A)}|x|,\qquad -\pi<x<\pi,\qquad f(x+2\pi)=f(x).`,
+    note:'Здесь нет скачка, но есть угол. На графике частичной суммы это видно.'
+  },
+  {
+    name:'Односторонняя ступень',
+    short:'step01',
+    formula:A=>String.raw`f(x)=\begin{cases}0,&-\pi<x<0,\\ ${A},&0<x<\pi,\end{cases}\qquad f(x+2\pi)=f(x).`,
+    note:'Ни чётная, ни нечётная функция. Нужно аккуратно считать оба типа коэффициентов.'
+  },
+  {
+    name:'Прямоугольный сигнал',
+    short:'square',
+    formula:A=>String.raw`f(x)=\begin{cases}-${A},&-\pi<x<0,\\ ${A},&0<x<\pi,\end{cases}\qquad f(x+2\pi)=f(x).`,
+    note:'Это модель переключения между двумя уровнями. Около разрыва ожидается выброс.'
+  },
+  {
+    name:'Полулинейный сигнал',
+    short:'half-ramp',
+    formula:A=>String.raw`f(x)=\begin{cases}0,&-\pi<x<0,\\ ${texA(A)}x,&0<x<\pi,\end{cases}\qquad f(x+2\pi)=f(x).`,
+    note:'Функция не обладает простой чётностью. Хороший вариант для тренировки прямого вычисления коэффициентов.'
+  },
+  {
+    name:'Треугольный импульс',
+    short:'triangle',
+    formula:A=>String.raw`f(x)=${texA(A)}(\pi-|x|),\qquad -\pi<x<\pi,\qquad f(x+2\pi)=f(x).`,
+    note:'Сигнал непрерывен, но имеет угол в вершине. Полезно сравнить с прямоугольным случаем.'
+  },
+  {
+    name:'Чётный прямоугольный импульс',
+    short:'pulse',
+    formula:A=>String.raw`f(x)=\begin{cases}${A},&|x|<\dfrac{\pi}{2},\\0,&\dfrac{\pi}{2}<|x|<\pi,\end{cases}\qquad f(x+2\pi)=f(x).`,
+    note:'Удобный пример чётного сигнала с разрывами в двух точках.'
+  }
+];
+
+const pointSets = [
+  [String.raw`-\pi`,String.raw`-\frac{2\pi}{3}`,String.raw`-\frac{\pi}{3}`,String.raw`0`,String.raw`\frac{\pi}{3}`,String.raw`\frac{2\pi}{3}`,String.raw`\pi`],
+  [String.raw`-\frac{3\pi}{4}`,String.raw`-\frac{\pi}{2}`,String.raw`-\frac{\pi}{4}`,String.raw`0`,String.raw`\frac{\pi}{4}`,String.raw`\frac{\pi}{2}`,String.raw`\frac{3\pi}{4}`],
+  [String.raw`-\frac{5\pi}{6}`,String.raw`-\frac{\pi}{2}`,String.raw`-\frac{\pi}{6}`,String.raw`0`,String.raw`\frac{\pi}{6}`,String.raw`\frac{\pi}{2}`,String.raw`\frac{5\pi}{6}`],
+  [String.raw`-\frac{2\pi}{3}`,String.raw`-\frac{\pi}{2}`,String.raw`-\frac{\pi}{6}`,String.raw`0`,String.raw`\frac{\pi}{6}`,String.raw`\frac{\pi}{2}`,String.raw`\frac{2\pi}{3}`]
+];
+
+function variant(d){
+  const templateIndex = mod(d[0] + 2*d[2] + d[4], templates.length);
+  const A = 1 + mod(d[1] + d[3], 3);
+  const pointIndex = mod(d[2] + d[3] + d[4], pointSets.length);
+  return {templateIndex, A, pointIndex, tpl:templates[templateIndex], points:pointSets[pointIndex]};
+}
+
+function metaCards(items){
+  return items.map(item=>String.raw`
+    <div class="metaCard">
+      <div class="k">${item.k}</div>
+      <div class="v">${item.v}</div>
+    </div>
+  `).join('');
+}
+
+function texToHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function render(raw){
+  const d = parseISU(raw) || [1,2,3,4,5,6];
+  const isu = d.join('');
+  const v = variant(d);
+  const tpl = v.tpl;
+  const html = String.raw`
+    <div class="badge">Вариант для ИСУ ${isu}</div>
+
+    <div class="section">
+      <div class="sectionHead">
+        <h2>Параметры варианта</h2>
+        <p>Один и тот же ИСУ всегда выдаёт одну и ту же функцию и амплитуду.</p>
+      </div>
+      <div class="sectionBody">
+        <div class="meta">
+          ${metaCards([
+            {k:'Функция', v:tpl.name},
+            {k:'Амплитуда', v:String.raw`\(A=${v.A}\)`},
+            {k:'Частичная сумма', v:String.raw`\(S_4(x)\)`}
+          ])}
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="sectionHead">
+        <h2>Индивидуальная функция</h2>
+        <p>Разложение в ряд Фурье нужно получить самостоятельно.</p>
+      </div>
+      <div class="sectionBody">
+        <div class="formulaBlock">\[ ${texToHtml(tpl.formula(v.A))} \]</div>
+        <div class="note">${tpl.note}</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="sectionHead">
+        <h2>Что нужно сделать</h2>
+        <p>Нужно показать собственные вычисления, таблицу, график и короткий вывод.</p>
+      </div>
+      <div class="sectionBody">
+        <ol class="taskList">
+          <li><strong>Определить чётность</strong> функции, если она есть, и сразу выписать, какие коэффициенты равны нулю.</li>
+          <li><strong>Найти коэффициенты Фурье</strong> на отрезке \([-\pi,\pi]\):
+            \[
+            f(x)\sim \frac{a_0}{2}+\sum_{n=1}^{\infty}\bigl(a_n\cos nx+b_n\sin nx\bigr),
+            \]
+            \[
+            a_0=\frac1\pi\int_{-\pi}^{\pi} f(x)\,dx,\qquad
+            a_n=\frac1\pi\int_{-\pi}^{\pi} f(x)\cos nx\,dx,\qquad
+            b_n=\frac1\pi\int_{-\pi}^{\pi} f(x)\sin nx\,dx.
+            \]
+            В отчёте нужно показать ход вычисления всех коэффициентов: \(a_0\), \(a_n\) и \(b_n\).</li>
+          <li><strong>Записать частичную сумму</strong> \(S_4(x)\), используя найденные коэффициенты при \(n=1,2,\ldots,4\).</li>
+          <li><strong>Построить на одном рисунке</strong> исходную функцию \(f(x)\) и \(S_4(x)\) на промежутке \([-\pi,\pi]\). Можно использовать Desmos, GeoGebra, Excel, Python или аккуратный рисунок от руки.</li>
+          <li><strong>Заполнить таблицу</strong> для контрольных точек ниже: \(x\), \(f(x)\), \(S_4(x)\), \(|f(x)-S_4(x)|\). В точках разрыва значение \(f(x)\) можно отметить отдельно.</li>
+          <li><strong>Написать вывод</strong> в 4–6 предложениях: где приближение получилось хуже всего, как это связано с разрывом или углом, и что показывает график частичной суммы.</li>
+        </ol>
+        <div class="note">Если значения записываются десятичными дробями, используйте запятую как разделитель: например, \(0{,}25\).</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="sectionHead">
+        <h2>Контрольные точки для таблицы</h2>
+        
+      </div>
+      <div class="sectionBody">
+        <table>
+          <thead><tr><th>\(x\)</th><th>\(f(x)\)</th><th>\(S_4(x)\)</th><th>\(|f(x)-S_4(x)|\)</th><th>Комментарий</th></tr></thead>
+          <tbody>
+            ${v.points.map(p=>String.raw`<tr><td>\(${p}\)</td><td></td><td></td><td></td><td></td></tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="sectionHead">
+        <h2>Оценивание: 5 баллов</h2>
+        <p>Баллы ставятся не только за ответ, но и за видимую самостоятельную работу.</p>
+      </div>
+      <div class="sectionBody">
+        <table>
+          <thead><tr><th>Критерий</th><th>Баллы</th><th>Что проверяется</th></tr></thead>
+          <tbody>
+            <tr><td>Коэффициенты Фурье</td><td>1,5</td><td>Чётность, корректные \(a_0\), \(a_n\), \(b_n\), показан ход вычисления всех коэффициентов.</td></tr>
+            <tr><td>Частичная сумма</td><td>0,75</td><td>Правильно записана \(S_4(x)\), коэффициенты подставлены именно для своего варианта.</td></tr>
+            <tr><td>Таблица значений</td><td>0,75</td><td>Заполнены контрольные точки из таблицы, есть значения \(f(x)\), \(S_4(x)\) и ошибка.</td></tr>
+            <tr><td>График</td><td>1,0</td><td>На одном рисунке есть \(f(x)\) и \(S_4(x)\), видно поведение около разрывов или углов.</td></tr>
+            <tr><td>Вывод</td><td>1,0</td><td>Есть осмысленное объяснение: где ошибка больше, почему, что меняет добавление гармоник.</td></tr>
+          </tbody>
+        </table>
+        <div class="note warn"><strong>Ограничения для проверки.</strong> Без вывода коэффициентов максимум 3 балла. Без графика и таблицы максимум 2,5 балла. Если сдан только текстовый ответ без индивидуальных численных данных, максимум 2 балла.</div>
+      </div>
+    </div>
+  `;
+  document.getElementById('card').innerHTML = html;
+  if(window.MathJax && MathJax.typesetPromise){ MathJax.typesetPromise([document.getElementById('card')]); }
+}
+
+function currentISU(){
+  return document.getElementById('isu').value.replace(/\D/g,'');
+}
+
+function run(){
+  const s = currentISU();
+  const err = document.getElementById('err');
+  if(!/^\d{6}$/.test(s)){ err.style.display='block'; return; }
+  err.style.display='none';
+  const url = new URL(window.location.href);
+  url.searchParams.set('isu', s);
+  history.replaceState(null,'',url.toString());
+  render(s);
+}
+
+document.getElementById('runBtn').addEventListener('click', run);
+document.getElementById('isu').addEventListener('keydown', e=>{ if(e.key==='Enter') run(); });
+document.getElementById('isu').addEventListener('input', e=>{ e.target.value = e.target.value.replace(/\D/g,'').slice(0,6); });
+document.getElementById('copyBtn').addEventListener('click', async ()=>{
+  const s = currentISU();
+  if(!/^\d{6}$/.test(s)){ document.getElementById('err').style.display='block'; return; }
+  const url = new URL(window.location.href);
+  url.searchParams.set('isu', s);
+  try{ await navigator.clipboard.writeText(url.toString()); document.getElementById('copyBtn').textContent='Ссылка скопирована'; setTimeout(()=>document.getElementById('copyBtn').textContent='Скопировать ссылку',1200); }
+  catch(e){ prompt('Скопируйте ссылку:', url.toString()); }
+});
+
+const params = new URLSearchParams(window.location.search);
+const init = params.get('isu') || '123456';
+document.getElementById('isu').value = init.replace(/\D/g,'').slice(0,6);
+render(document.getElementById('isu').value || '123456');
+</script>
+</body>
+</html>
