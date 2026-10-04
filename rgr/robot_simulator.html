@@ -1,0 +1,129 @@
+<!doctype html><html lang="ru"><head><title>Симулятор РГР</title><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<script>
+window.MathJax={
+  tex:{inlineMath:[["\\(","\\)"]],displayMath:[["\\[","\\]"]]},
+  svg:{fontCache:"local"},
+  startup:{typeset:true}
+};
+</script>
+<script src="assets/mathjax/tex-svg.js"></script><script src="assets/rgr_core.js"></script><style>
+:root{
+  --bg:#f4f5f7;--paper:#ffffff;--paper2:#fafbfc;--line:#d6dbe1;
+  --text:#20252b;--muted:#68727d;--accent:#365f88;--accent-soft:#eef3f7;
+  --good:#356750;--good-soft:#edf6f1;--bad:#994a4a;--bad-soft:#fbefef;
+  --risk:#b7655d;--path:#365f88;--motion:#3f7761;--compare:#7b678c;--field:#927130;
+}
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{margin:0;color:var(--text);background:var(--bg);font:15px/1.52 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+a{color:var(--accent)}
+.app{max-width:1160px;margin:0 auto;padding:25px 22px 34px}
+.head{margin-bottom:18px;border-bottom:2px solid var(--accent);padding-bottom:13px}
+.head h1{margin:0;font-size:clamp(25px,3vw,35px);line-height:1.16;font-weight:720;letter-spacing:-.016em}
+.head p{margin:8px 0 0;color:var(--muted);max-width:850px}
+.grid{display:grid;grid-template-columns:minmax(0,1.42fr) minmax(300px,.58fr);gap:16px}.grid>*{min-width:0}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:8px;min-width:0}
+.p16{padding:16px}.p18{padding:18px}
+h2,h3{line-height:1.2} h3{font-size:16px;margin:0 0 10px}
+.small{font-size:12.5px;color:var(--muted)}
+.control{display:block;min-width:0}.control-label{display:block;font-size:13px;color:#4e5762;margin-bottom:5px}
+label{font-size:13px;color:#4e5762}
+input,select,button{font:inherit}
+input[type=number],input[type=text],select{width:100%;min-height:42px;border:1px solid #c8d0d9;background:#fff;color:var(--text);border-radius:7px;padding:9px 10px;outline:none}
+input:focus,select:focus,button:focus-visible{border-color:var(--accent);box-shadow:0 0 0 3px rgba(54,95,136,.13);outline:none}
+button{min-height:40px;border:1px solid #bec7d0;background:#fff;color:var(--text);padding:9px 12px;border-radius:7px;cursor:pointer}
+button:hover{background:#f7f9fb} button:disabled{opacity:.5;cursor:not-allowed}
+button.primary{background:var(--accent);color:#fff;border-color:var(--accent)} button.primary:hover{background:#2d5073}
+button.secondary{background:var(--good-soft);border-color:#bfd6ca;color:#285744}
+.row{display:flex;gap:9px;flex-wrap:wrap;align-items:center}.row>*{min-width:0}
+.cols2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sep{border-top:1px solid var(--line);margin:15px 0}
+.formula{background:#fbfbfc;border-left:3px solid #9ca9b6;padding:10px 13px;margin:11px 0;min-width:0;font-size:15px}
+.formula mjx-container[jax="SVG"]{margin:.28em 0!important}
+.formula mjx-container[jax="SVG"][display="true"]{overflow:visible!important}
+.scene{border:1px solid var(--line);border-radius:7px;overflow:hidden;background:#fff}
+.scene canvas{display:block;width:100%;height:auto;background:#fff}
+.scene-placeholder{padding:20px 16px;border:1px dashed #c5ccd4;border-radius:7px;background:#fafbfc;color:var(--muted);text-align:center}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-top:12px}
+.metric{border:1px solid var(--line);background:var(--paper2);border-radius:7px;padding:11px}
+.metric .k{font-size:12px;color:var(--muted);min-height:20px}.metric .v{font-size:18px;font-weight:700;margin-top:3px;font-variant-numeric:tabular-nums}
+.table{width:100%;border-collapse:collapse;font-size:12.5px}.table th,.table td{padding:7px;border-bottom:1px solid #e3e6ea;text-align:right;vertical-align:top}.table th{font-weight:650;color:#4b5560;background:#fafbfc}.table th:first-child,.table td:first-child{text-align:left}
+.note{padding:11px 12px;background:var(--accent-soft);border:1px solid #cedae5;border-radius:7px}
+.good{color:var(--good)}.bad{color:var(--bad)}
+.upload{padding:11px;background:#fafbfc;border:1px solid var(--line);border-radius:7px}
+.file-row{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.file-button{display:inline-flex;align-items:center;justify-content:center;min-height:40px;border:1px solid #bec7d0;background:#fff;border-radius:7px;padding:8px 12px;color:var(--text);cursor:pointer}.file-button:hover{background:#f7f9fb}.file-name{color:var(--muted);font-size:12.5px;min-width:0;overflow-wrap:anywhere}
+.visually-hidden{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+.tabs{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px}.tab{padding:7px 10px}.tab.active{background:var(--accent-soft);border-color:#9db3c9;color:#244e78}
+.math-label{color:#39414a}
+.footer{margin-top:16px;border-top:1px solid var(--line);padding-top:10px;color:var(--muted);font-size:12px}
+@media(max-width:900px){.grid{grid-template-columns:1fr}.metrics{grid-template-columns:1fr 1fr}}
+@media(max-width:520px){.app{padding:14px 10px 24px}.cols2,.metrics{grid-template-columns:1fr}.head h1{font-size:26px}.row button{width:100%}.formula{font-size:14px;padding:9px 10px}.file-row{align-items:stretch}.file-button{width:100%}}
+</style></head>
+<body><main class="app"><a href="index.html" style="display:inline-block;margin-bottom:10px;color:#365f88;text-decoration:none;font-size:13px">← Главная страница РГР</a>
+<header class="head"><h1>Карта риска и движение робота</h1><p>Загрузите JSON варианта, исследуйте влияние выходов модуля восприятия на A* и сравните локальное движение с вращательной составляющей и без неё.</p></header>
+<div class="grid">
+<section class="panel p16">
+  <div class="tabs"><button class="tab active sim-control" data-layer="risk" type="button" disabled>Карта риска</button><button class="tab sim-control" data-layer="plain" type="button" disabled>Геометрия</button></div>
+  <div id="scenePending" class="scene-placeholder">Загрузите JSON своей пары, чтобы начать работу.</div>
+  <div id="sceneWrap" class="scene" hidden><canvas id="cv" width="820" height="540" aria-label="Карта риска и траектории робота"></canvas></div>
+  <div class="row" style="margin-top:11px"><button id="replan" class="primary sim-control" type="button" disabled>Пересчитать A*</button><button id="run" class="secondary sim-control" type="button" disabled>Запустить робота</button><button id="reset" class="sim-control" type="button" disabled>Сбросить</button></div>
+  <div class="metrics">
+    <div class="metric"><div class="k">\(L_{A^*}\)</div><div class="v" id="mL">—</div></div>
+    <div class="metric"><div class="k">\(I_{A^*}\)</div><div class="v" id="mI">—</div></div>
+    <div class="metric"><div class="k">\(J_{A^*}\)</div><div class="v" id="mJ">—</div></div>
+    <div class="metric"><div class="k">\(d_{\min}\) до препятствий</div><div class="v" id="mD">—</div></div>
+  </div>
+  <div class="note" id="status" style="margin-top:12px" aria-live="polite">Загрузите JSON своей пары, чтобы начать работу.</div>
+</section>
+<aside class="panel p18">
+  <div class="upload"><div class="control-label">JSON вашей пары</div><div class="file-row"><input id="file" class="visually-hidden" type="file" accept="application/json,.json"><label class="file-button" for="file">Выбрать JSON</label><span id="fileName" class="file-name">Файл не выбран</span></div><div class="row" style="margin-top:9px"><button id="demo" type="button">Открыть демонстрационный пример</button></div></div>
+  <div class="sep"></div><h3>Ключевое обнаружение</h3>
+  <div class="cols2"><label><span class="math-label">\(p\)</span> — коэффициент доверия<input class="sim-control" id="p" type="text" inputmode="decimal" autocomplete="off" disabled></label><label><span class="math-label">\(\sigma\), м</span> — масштаб неопределённости<input class="sim-control" id="sig" type="text" inputmode="decimal" autocomplete="off" disabled></label></div>
+  <div class="sep"></div><h3>Планирование и управление</h3>
+  <div class="cols2"><label><span class="math-label">\(\lambda_J\)</span><input class="sim-control" id="lam" type="text" inputmode="decimal" autocomplete="off" disabled></label><label><span class="math-label">\(\beta_s\), м²/с</span><input class="sim-control" id="beta" type="text" inputmode="decimal" autocomplete="off" disabled></label></div>
+  <label style="margin-top:9px"><span class="math-label">\(|\omega|\), м²/с</span><input class="sim-control" id="om" type="text" inputmode="decimal" autocomplete="off" disabled></label>
+  <div class="sep"></div>
+  <label><input class="sim-control" id="field" type="checkbox" disabled> показать поле для фиксированной \(T\)</label>
+  <label style="margin-top:9px">фиксированная опорная точка<select class="sim-control" id="wp" disabled></select></label>
+  <div class="formula">\[J(\Gamma)=L(\Gamma)+\lambda_J\int_\Gamma s(x,y)\,d\ell.\]</div>
+  <div class="formula">\[
+  \mathbf F_T(\mathbf r)=k(\mathbf T-\mathbf r)-\beta_s\nabla s(\mathbf r)+\mathbf C(\mathbf r).
+  \]
+  \[
+  \mathbf C(\mathbf r)=\omega\frac{(-(y-\widehat y_*),\,x-\widehat x_*)}{\rho_*^2+a_*^2}.
+  \]</div>
+  <div id="cfg" class="small"></div>
+</aside>
+</div>
+<section class="panel p18" style="margin-top:16px"><h3>Сравнение локального движения</h3><p class="small">После изменения \(p\), \(\sigma\), \(\lambda_J\), \(\beta_s\) или \(|\omega|\) пересчитайте A*. Параметр \(\sigma\) влияет и на карту риска, и на модельную запрещённую область.</p><table class="table"><thead><tr><th>режим</th><th>длина, м</th><th>\(d_{\min}\), м</th><th>шагов</th><th>результат</th></tr></thead><tbody id="cmp"></tbody></table></section>
+</main>
+<script>
+const SAMPLE={"project":"robot_perception_navigation","package_version":"0.6.3","schema_version":1,"variant":0,"workspace":{"width":12.0,"height":8.0,"robot_radius":0.22},"solver_config":{"package_version":"0.6.3","schema_version":1,"workspace_width":12.0,"workspace_height":8.0,"robot_radius":0.22,"risk_background":0.05,"uncertainty_hard_factor":0.45,"astar_grid_step":0.2,"astar_margin":0.03,"quadrature_h":0.03,"quadrature_rel_tol":0.001,"dt":0.035,"vmax":1.35,"waypoint_stride":3,"waypoint_tol":0.24,"goal_tol":0.18,"max_steps":8000,"trajectory_record_stride":3},"start":[0.8,1.0],"goal":[11.2,7.0],"risk_background":0.05,"lambda_J":1.04,"field_k":1.27,"beta_s":0.438,"omega_abs":0.17,"key_obstacle":0,"obstacles":[{"id":1,"label":"ключевое обнаружение","x":6.0,"y":4.108,"radius":0.56,"confidence":0.85,"sigma":0.45},{"id":2,"label":"обнаружение 2","x":3.153,"y":5.865,"radius":0.38,"confidence":0.72,"sigma":0.38},{"id":3,"label":"обнаружение 3","x":8.908,"y":1.617,"radius":0.42,"confidence":0.6,"sigma":0.39},{"id":4,"label":"обнаружение 4","x":9.448,"y":6.435,"radius":0.38,"confidence":0.67,"sigma":0.36}],"experiment":{"confidence_values":[0.55,0.85,0.99],"sigma_values":[0.29,0.45,0.63]},"local_annulus_outer_radius":1.46,"candidate_routes":{"A":[[0.8,1.0],[5.0,5.2],[6.0,5.6],[9.8,5.6],[11.2,7.0]],"B":[[0.8,1.0],[2.6,1.0],[5.4,2.4],[5.8,2.4],[9.0,5.6],[9.8,5.6],[11.2,7.0]]}};let scene=null,baseScene=null,path=null,sim=null,sim0=null,layer='risk',anim=false,frame=0;
+const $=id=>document.getElementById(id),cv=$('cv'),g=cv.getContext('2d');
+const typeset=node=>window.MathJax&&MathJax.typesetPromise?MathJax.typesetPromise(node?[node]:undefined):Promise.resolve();
+const fmt=(v,d=2)=>new Intl.NumberFormat('ru-RU',{minimumFractionDigits:d,maximumFractionDigits:d,useGrouping:false}).format(v);
+const parseRU=v=>{const n=Number(String(v??'').trim().replace(',','.'));return Number.isFinite(n)?n:NaN};
+const texNum=(v,d=2)=>fmt(v,d).replace(',', '{,}');
+const sciTex=(v,d=2)=>{if(!Number.isFinite(v)||v===0)return '0';const [m,e]=v.toExponential(d).split('e');return `${m.replace('.', '{,}')}\\cdot10^{${Number(e)}}`};
+const clone=x=>JSON.parse(JSON.stringify(x));
+function sameConfig(c){if(!c)return false;for(const [k,v] of Object.entries(RGR.C)){if(!(k in c))return false;const w=c[k];if(typeof v==='number'){if(!Number.isFinite(Number(w))||Math.abs(Number(w)-v)>1e-12)return false}else if(w!==v)return false}return true}
+function valid(s){return !!(s&&s.package_version===RGR.C.package_version&&s.schema_version===RGR.C.schema_version&&sameConfig(s.solver_config))}
+function setReady(on){document.querySelectorAll('.sim-control').forEach(e=>e.disabled=!on);if(!on){$('run').disabled=true;$('reset').disabled=true;$('replan').disabled=true}}
+function clearResults(){path=sim=sim0=null;anim=false;frame=0;for(const id of ['mL','mI','mJ','mD'])$(id).textContent='—';$('cmp').innerHTML='';$('cfg').innerHTML='';$('wp').innerHTML='';$('sceneWrap').hidden=true;$('scenePending').hidden=false}
+function sync(auto=true){if(!scene)return;const k=scene.obstacles[scene.key_obstacle];$('p').value=fmt(k.confidence,2);$('sig').value=fmt(k.sigma,2);$('lam').value=fmt(scene.lambda_J,2);$('beta').value=fmt(scene.beta_s,3);$('om').value=fmt(scene.omega_abs,2);$('cfg').innerHTML=`Вариант <b>${scene.variant}</b><br>\\(h_g\\) = ${fmt(RGR.C.astar_grid_step,2)} м, \\(m_{\\rm plan}\\) = ${fmt(RGR.C.astar_margin,2)} м<br>\\(\\Delta t\\) = ${fmt(RGR.C.dt,3)} с, \\(v_{\\max}\\) = ${fmt(RGR.C.vmax,2)} м/с`;typeset($('cfg'));$('scenePending').hidden=true;$('sceneWrap').hidden=false;setReady(true);$('reset').disabled=false;if(auto)replan();else draw()}
+function loadScene(s,label,demo=false){if(!valid(s))throw new Error('JSON не соответствует схеме или канонической численной конфигурации комплекта.');baseScene=clone(s);scene=clone(s);sync(true);$('fileName').textContent=demo?'демонстрационный пример':label;$('status').innerHTML=demo?'Открыт <b>демонстрационный пример</b>. Для своей работы загрузите JSON пары.':'JSON загружен; A* и движение пересчитаны.'}
+function applyInputs(){if(!scene)throw new Error('Сначала загрузите JSON пары.');const k=scene.obstacles[scene.key_obstacle],vals=[parseRU($('p').value),parseRU($('sig').value),parseRU($('lam').value),parseRU($('beta').value),parseRU($('om').value)];if(vals.some(v=>!Number.isFinite(v)))throw new Error('Проверьте числовые поля: допускаются десятичная запятая и точка.');[k.confidence,k.sigma,scene.lambda_J,scene.beta_s,scene.omega_abs]=vals}
+function replan(){if(!scene)return;anim=false;try{applyInputs()}catch(err){$('status').innerHTML='<span class="bad">'+String(err.message||err)+'</span>';return}path=RGR.astar(scene.start,scene.goal,scene.obstacles,scene.lambda_J);if(!path){sim=sim0=null;$('status').innerHTML='<span class="bad">A*: маршрут не найден для текущих параметров.</span>';$('cmp').innerHTML='';$('run').disabled=true;draw();return}const m=RGR.metrics(path,scene.obstacles,scene.lambda_J),key=scene.obstacles[scene.key_obstacle],omega=RGR.rotationSign(path,key)*scene.omega_abs;sim=RGR.simulate(scene,path,omega);sim0=RGR.simulate(scene,path,0);$('mL').textContent=fmt(m.length,3)+' м';$('mI').textContent=fmt(m.risk,3)+' м';$('mJ').textContent=fmt(m.cost,3)+' м';$('mD').textContent=fmt(m.clearance,3)+' м';$('status').innerHTML=`A* найден. Ключевое обнаружение обходится <b>${omega<0?'сверху':'снизу'}</b>; \\(\\omega=${texNum(omega,2)}\\,\\mathrm{m}^2/\\mathrm{s}\\). Относительное расхождение квадратуры: \\(\\varepsilon_I=${sciTex(m.quad_rel,2)}\\).`;typeset($('status'));const wp=RGR.waypoints(path);$('wp').innerHTML=wp.map((p,i)=>`<option value="${i}">T${i} = (${fmt(p[0],1)}; ${fmt(p[1],1)})</option>`).join('');$('wp').value=String(Math.min(10,wp.length-1));$('cmp').innerHTML=row('\\(\\omega=0\\)',sim0)+row('штатное \\(\\omega\\)',sim);typeset($('cmp'));frame=0;$('run').disabled=false;draw()}
+function row(name,d){return `<tr><td>${name}</td><td>${fmt(d.trajectory_length,3)}</td><td>${fmt(d.min_clearance,3)}</td><td>${d.steps}</td><td class="${d.reached&&!d.collided?'good':'bad'}">${d.reached&&!d.collided?'цель достигнута':d.collided?'столкновение':'цель не достигнута'}</td></tr>`}
+function xy(x,y){return [x/scene.workspace.width*cv.width,cv.height-y/scene.workspace.height*cv.height]}
+function drawHeat(){const step=4;let max=.001,vals=[];for(let py=0;py<cv.height;py+=step)for(let px=0;px<cv.width;px+=step){const x=px/cv.width*scene.workspace.width,y=(cv.height-py)/cv.height*scene.workspace.height,z=RGR.risk(x,y,scene.obstacles);vals.push([px,py,z]);max=Math.max(max,z)}for(const [px,py,z] of vals){const t=Math.min(1,z/Math.max(.1,max*.75));const r=Math.round(252-52*t),gg=Math.round(248-110*t),b=Math.round(242-125*t);g.fillStyle=`rgb(${r},${gg},${b})`;g.fillRect(px,py,step,step)}}
+function line(P,color,w=2,dash=[]){if(!P||P.length<2)return;g.strokeStyle=color;g.lineWidth=w;g.setLineDash(dash);g.beginPath();let q=xy(P[0][0],P[0][1]);g.moveTo(...q);for(let i=1;i<P.length;i++){q=xy(P[i][0],P[i][1]);g.lineTo(...q)}g.stroke();g.setLineDash([])}
+function circle(x,y,r,color,dash=[]){const p=xy(x,y),scale=Math.min(cv.width/scene.workspace.width,cv.height/scene.workspace.height);g.strokeStyle=color;g.lineWidth=1.4;g.setLineDash(dash);g.beginPath();g.arc(p[0],p[1],r*scale,0,Math.PI*2);g.stroke();g.setLineDash([])}
+function drawField(){if(!scene||!$('field').checked||!path)return;const wp=RGR.waypoints(path),T=wp[+$('wp').value||0],key=scene.obstacles[scene.key_obstacle],omega=RGR.rotationSign(path,key)*scene.omega_abs;g.strokeStyle='#99742f';g.lineWidth=1.15;for(let y=.4;y<scene.workspace.height;y+=.65)for(let x=.4;x<scene.workspace.width;x+=.65){if(RGR.segmentBlocked([x,y],[x,y],scene.obstacles,0))continue;let [u,v]=RGR.field(x,y,T,scene.obstacles,scene.field_k,scene.beta_s,omega,key),m=Math.hypot(u,v);if(m<1e-6)continue;u=u/m*.23;v=v/m*.23;let a=xy(x,y),b=xy(x+u,y+v);g.beginPath();g.moveTo(...a);g.lineTo(...b);g.stroke()}const tp=xy(T[0],T[1]);g.fillStyle='#99742f';g.fillRect(tp[0]-4,tp[1]-4,8,8)}
+function draw(){if(!scene)return;g.fillStyle='#fff';g.fillRect(0,0,cv.width,cv.height);if(layer==='risk')drawHeat();g.strokeStyle='#e5e8ec';g.lineWidth=1;for(let x=0;x<=scene.workspace.width;x++){let a=xy(x,0),b=xy(x,scene.workspace.height);g.beginPath();g.moveTo(...a);g.lineTo(...b);g.stroke()}for(let y=0;y<=scene.workspace.height;y++){let a=xy(0,y),b=xy(scene.workspace.width,y);g.beginPath();g.moveTo(...a);g.lineTo(...b);g.stroke()}for(const o of scene.obstacles){circle(o.x,o.y,RGR.forbiddenRadius(o),'#7e8b98',[6,5]);const p=xy(o.x,o.y),scale=Math.min(cv.width/scene.workspace.width,cv.height/scene.workspace.height);g.fillStyle='rgba(182,93,85,.18)';g.strokeStyle='#a4544d';g.beginPath();g.arc(p[0],p[1],o.radius*scale,0,Math.PI*2);g.fill();g.stroke();g.fillStyle='#313840';g.font='13px system-ui';g.fillText(String(o.id),p[0]-4,p[1]+4)}line(path,'#315f91',2.6);drawField();if(sim)line(sim.trajectory,'#3f7761',2.1);if(sim0)line(sim0.trajectory,'#78628f',1.7,[6,4]);for(const [p,c,l] of [[scene.start,'#3f7761','S'],[scene.goal,'#99742f','G']]){const q=xy(...p);g.fillStyle=c;g.beginPath();g.arc(q[0],q[1],6,0,Math.PI*2);g.fill();g.font='600 13px system-ui';g.fillText(l,q[0]+9,q[1]-8)}if(anim&&sim){const q=sim.trajectory[Math.min(frame,sim.trajectory.length-1)],z=xy(...q);g.fillStyle='#20252c';g.beginPath();g.arc(z[0],z[1],6,0,Math.PI*2);g.fill()}}
+function animate(){if(!sim)return;anim=true;frame=0;const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;function tick(){draw();if(!anim)return;if(frame<sim.trajectory.length-1){frame=Math.min(sim.trajectory.length-1,frame+(reduced?8:2));requestAnimationFrame(tick)}else anim=false}tick()}
+$('replan').addEventListener('click',replan);$('run').addEventListener('click',animate);$('reset').addEventListener('click',()=>{if(!baseScene)return;anim=false;scene=clone(baseScene);sync(true);$('status').textContent='Параметры восстановлены до исходного состояния последнего загруженного варианта.'});$('demo').addEventListener('click',()=>{try{loadScene(SAMPLE,'демонстрационный пример',true)}catch(err){$('status').innerHTML='<span class="bad">'+String(err.message||err)+'</span>'}});$('field').addEventListener('change',draw);$('wp').addEventListener('change',draw);document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));b.classList.add('active');layer=b.dataset.layer;draw()}));
+$('file').addEventListener('change',async e=>{try{const f=e.target.files&&e.target.files[0];if(!f)return;const s=JSON.parse(await f.text());loadScene(s,f.name,false)}catch(err){$('status').innerHTML='<span class="bad">'+String(err.message||err)+'</span>'}});
+clearResults();setReady(false);typeset();
+</script></body></html>
