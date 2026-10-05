@@ -1,0 +1,176 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Предел последовательности — интерактив</title>
+<script>window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']]},svg:{fontCache:'global'}};</script><script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+:root{--ink:#172033;--muted:#657083;--line:#d7e0e8;--paper:#fff;--bg:#eef2f6;--blue:#245f93;--blue2:#eaf4fc;--green:#30734b;--red:#b34545;--amber:#a36511}*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,Segoe UI,Arial,sans-serif}.app{max-width:1320px;margin:auto;padding:20px}.hero{background:#fff;border:1px solid var(--line);border-radius:20px;padding:20px 22px;margin-bottom:14px}.hero h1{font-size:28px;margin:0 0 6px}.hero p{margin:0;color:var(--muted);line-height:1.55}.grid{display:grid;grid-template-columns:360px 1fr;gap:14px}.panel,.viz,.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px}.stack>*+*{margin-top:13px}h2{font-size:18px;margin:0 0 8px}.label{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}select,input[type=range]{width:100%}select{font:inherit;padding:10px;border:1px solid #cbd5df;border-radius:10px;background:#fff}.row{display:grid;grid-template-columns:100px 1fr 60px;gap:10px;align-items:center}.row output{text-align:center;font-weight:800;font-variant-numeric:tabular-nums}.formula{background:#f7f9fb;border:1px solid #e1e7ed;border-radius:13px;padding:10px 12px;overflow-x:auto}.definition{background:var(--blue2);border:1px solid #bfd7e9;border-radius:14px;padding:12px}.status{border-radius:13px;padding:11px 12px;font-weight:700;line-height:1.45}.ok{background:#eef8f1;border:1px solid #b9ddc4;color:#275d3c}.bad{background:#fff0ef;border:1px solid #efc1bd;color:#8d3737}.warn{background:#fff7e8;border:1px solid #efd5a7;color:#815414}.canvasWrap{position:relative;background:#fff;border:1px solid #e0e6ec;border-radius:14px;overflow:hidden}.canvasWrap canvas{width:100%;height:520px;display:block}.legend{display:flex;gap:18px;flex-wrap:wrap;color:var(--muted);font-size:13px;margin-bottom:8px}.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px}.dot.blue{background:#2f6ea5}.dot.green{background:#4d9a68}.dot.red{background:#c95757}.strip{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.mini{background:#fff;border:1px solid var(--line);border-radius:15px;padding:13px}.mini b{display:block;margin-bottom:4px}.mini span{font-size:13px;color:var(--muted);line-height:1.4}.controls{display:flex;gap:8px;flex-wrap:wrap}.btn{border:1px solid #c6d2dd;background:#fff;border-radius:10px;padding:8px 11px;font-weight:750;cursor:pointer}.btn.active{background:var(--blue);color:#fff;border-color:var(--blue)}@media(max-width:900px){.grid{grid-template-columns:1fr}.canvasWrap canvas{height:420px}.strip{grid-template-columns:1fr}}
+</style></head><body><div class="app">
+<section class="hero"><h1>Предел последовательности</h1><p>Меняйте \(\varepsilon\), предполагаемый предел и саму последовательность. Полоса показывает \(\varepsilon\)-окрестность числа \(A\), а вертикальная линия — номер \(N\), после которого все последующие члены должны оставаться внутри полосы.</p></section>
+<div class="grid">
+<section class="panel stack">
+<div><div class="label">Последовательность</div><select id="seq"><option value="inv">xₙ = 1/n</option><option value="altinv">xₙ = (−1)ⁿ/n</option><option value="ratio">xₙ = (3n+5)/(2n)</option><option value="sqrt">xₙ = √(n²+3) − n</option><option value="alt">xₙ = (−1)ⁿ</option><option value="sq">xₙ = n²</option></select></div>
+<div class="formula" id="seqFormula">\[x_n=\frac1n\]</div>
+<div class="row"><label for="eps">\(\varepsilon\)</label><input id="eps" type="range" min="0.02" max="1.5" step="0.01" value="0.25"><output id="epsOut">0,25</output></div>
+<div class="row"><label for="A">\(A\)</label><input id="A" type="range" min="-2" max="3" step="0.05" value="0"><output id="AOut">0</output></div>
+<div class="row"><label for="count">точек</label><input id="count" type="range" min="20" max="150" step="5" value="60"><output id="countOut">60</output></div>
+<div class="definition">
+\[
+\begin{gathered}
+\forall\,\varepsilon>0\quad \exists\,N_\varepsilon\in\mathbb N:\\[2mm]
+\forall\,n>N_\varepsilon\quad |x_n-A|<\varepsilon.
+\end{gathered}
+\]
+</div>
+<div id="status" class="status ok"></div>
+<div class="controls"><button class="btn active" data-preset="inv">\(1/n\)</button><button class="btn" data-preset="ratio">дробь</button><button class="btn" data-preset="alt">колебания</button><button class="btn" data-preset="sq">рост</button></div>
+</section>
+<section class="viz"><div class="legend"><span><i class="dot blue"></i>члены \(x_n\)</span><span><i class="dot green"></i>внутри полосы</span><span><i class="dot red"></i>вне полосы после выбранного \(N\)</span></div><div class="canvasWrap"><canvas id="canvas" width="1000" height="560"></canvas></div></section>
+</div>
+<div class="strip" style="margin-top:14px"><div class="mini"><b>Что означает \(\varepsilon\)?</b><span>Требуемая точность: насколько близко к \(A\) должны находиться все достаточно поздние члены.</span></div><div class="mini"><b>Почему \(N_\varepsilon\) зависит от \(\varepsilon\)?</b><span>При уменьшении \(\varepsilon\) полоса сужается, и часто приходится уходить дальше по последовательности.</span></div><div class="mini"><b>Как увидеть отсутствие предела?</b><span>Если для некоторого \(\varepsilon\) сколь угодно далеко остаются точки вне полосы, подходящего \(N\) нет.</span></div></div>
+</div><script>
+(()=>{
+  const $ = (sel) => document.querySelector(sel);
+  const seq = $('#seq');
+  const eps = $('#eps');
+  const A = $('#A');
+  const count = $('#count');
+  const epsOut = $('#epsOut');
+  const AOut = $('#AOut');
+  const countOut = $('#countOut');
+  const canvas = $('#canvas');
+  const ctx = canvas.getContext('2d');
+  const status = $('#status');
+
+  const defs = {
+    inv:    {tex:'x_n=\\dfrac1n', f:n=>1/n, A:0},
+    altinv: {tex:'x_n=\\dfrac{(-1)^n}{n}', f:n=>(n%2 ? -1 : 1)/n, A:0},
+    ratio:  {tex:'x_n=\\dfrac{3n+5}{2n}=\\dfrac32+\\dfrac5{2n}', f:n=>(3*n+5)/(2*n), A:1.5},
+    sqrt:   {tex:'x_n=\\sqrt{n^2+3}-n', f:n=>Math.sqrt(n*n+3)-n, A:0},
+    alt:    {tex:'x_n=(-1)^n', f:n=>(n%2 ? -1 : 1), A:0},
+    sq:     {tex:'x_n=n^2', f:n=>n*n, A:0}
+  };
+  let current = 'inv';
+
+  function ru(x){
+    return (+x.toFixed(2)).toString().replace('.', ',');
+  }
+  function typesetFormula(){
+    const node = $('#seqFormula');
+    if (window.MathJax?.typesetPromise) {
+      window.MathJax.typesetClear?.([node]);
+      window.MathJax.typesetPromise([node]);
+    }
+  }
+  function updateFormula(){
+    $('#seqFormula').innerHTML = '\\[' + defs[current].tex + '\\]';
+    typesetFormula();
+  }
+  function setPreset(key){
+    current = key;
+    seq.value = key;
+    A.value = defs[key].A;
+    document.querySelectorAll('[data-preset]').forEach((b)=>{
+      b.classList.toggle('active', b.dataset.preset === key);
+    });
+    updateFormula();
+    draw();
+  }
+
+  // Возвращает последний номер, на котором условие |x_n-A|<eps нарушается
+  // в диапазоне 1..max. Тогда все проверенные n>N уже лежат в полосе.
+  function findCheckedThreshold(f, a, e, max=5000){
+    let lastBad = -1;
+    for(let n=max; n>=1; n--){
+      if(Math.abs(f(n)-a) >= e){ lastBad=n; break; }
+    }
+    if(lastBad >= max) return null;
+    return lastBad < 0 ? 0 : lastBad;
+  }
+
+  function draw(){
+    current = seq.value;
+    const d = defs[current];
+    const e = +eps.value;
+    const a = +A.value;
+    const Npts = +count.value;
+    epsOut.textContent = ru(e);
+    AOut.textContent = ru(a);
+    countOut.textContent = Npts;
+
+    const checkedN = findCheckedThreshold(d.f, a, e);
+    const vals = [];
+    for(let n=1; n<=Npts; n++) vals.push(d.f(n));
+
+    let ymin = Math.min(...vals, a-e);
+    let ymax = Math.max(...vals, a+e);
+    if(current === 'sq') ymax = Math.min(ymax, Math.max(100, Npts*Npts*.16));
+    const pad = (ymax-ymin || 1)*.12;
+    ymin -= pad; ymax += pad;
+
+    const W=canvas.width, H=canvas.height, L=60, R=24, T=24, B=46;
+    const X = n => L + (n-1)/(Npts-1)*(W-L-R);
+    const Y = y => T + (ymax-y)/(ymax-ymin)*(H-T-B);
+
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle='#fff'; ctx.fillRect(0,0,W,H);
+
+    // epsilon-полоса
+    ctx.fillStyle='rgba(77,154,104,.12)';
+    ctx.fillRect(L, Y(a+e), W-L-R, Y(a-e)-Y(a+e));
+
+    // горизонтальная сетка
+    ctx.strokeStyle='#dfe5eb'; ctx.lineWidth=1;
+    for(let i=0;i<=5;i++){
+      const y=ymin+(ymax-ymin)*i/5;
+      ctx.beginPath(); ctx.moveTo(L,Y(y)); ctx.lineTo(W-R,Y(y)); ctx.stroke();
+      ctx.fillStyle='#687789'; ctx.font='13px Segoe UI'; ctx.fillText(ru(y),6,Y(y)+4);
+    }
+
+    // оси
+    ctx.strokeStyle='#7d8a98';
+    ctx.beginPath(); ctx.moveTo(L,T); ctx.lineTo(L,H-B); ctx.lineTo(W-R,H-B); ctx.stroke();
+
+    // границы полосы и линия A
+    ctx.strokeStyle='#4d9a68'; ctx.setLineDash([7,5]);
+    for(const y of [a-e,a+e]){
+      ctx.beginPath(); ctx.moveTo(L,Y(y)); ctx.lineTo(W-R,Y(y)); ctx.stroke();
+    }
+    ctx.setLineDash([]);
+    ctx.strokeStyle='#245f93'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(L,Y(a)); ctx.lineTo(W-R,Y(a)); ctx.stroke();
+
+    if(checkedN !== null && checkedN < Npts){
+      ctx.strokeStyle='#a36511'; ctx.setLineDash([5,4]);
+      ctx.beginPath(); ctx.moveTo(X(Math.max(1,checkedN)),T); ctx.lineTo(X(Math.max(1,checkedN)),H-B); ctx.stroke();
+      ctx.setLineDash([]); ctx.fillStyle='#80520e';
+      ctx.fillText('Nε='+checkedN, X(Math.max(1,checkedN))+5, T+14);
+    }
+
+    for(let n=1;n<=Npts;n++){
+      const y=vals[n-1];
+      if(y<ymin || y>ymax) continue;
+      let col='#2f6ea5';
+      if(checkedN !== null && n>checkedN) col=Math.abs(y-a)<e ? '#4d9a68' : '#c95757';
+      ctx.fillStyle=col; ctx.beginPath(); ctx.arc(X(n),Y(y),4.2,0,Math.PI*2); ctx.fill();
+    }
+
+    ctx.fillStyle='#687789'; ctx.font='13px Segoe UI';
+    for(let n=10;n<=Npts;n+=10) ctx.fillText(String(n),X(n)-6,H-B+19);
+    ctx.fillText('n',W-R-8,H-B+31);
+
+    if(checkedN === null){
+      status.className='status bad';
+      status.innerHTML='В диапазоне до <b>n=5000</b> не найден номер, после которого все проверенные члены остаются в полосе. Это наглядный сигнал, что выбранный кандидат на предел нужно пересмотреть; строгий вывод делается отдельно.';
+    } else {
+      status.className='status ok';
+      let extra='';
+      if(current==='inv') extra=' Для <b>1/n</b> теоретически достаточно взять N<sub>ε</sub> ≥ ⌈1/ε⌉.';
+      if(current==='ratio') extra=' Здесь |x<sub>n</sub>−3/2|=5/(2n).';
+      status.innerHTML='Для выбранного ε в проверенном диапазоне подходит <b>N<sub>ε</sub> = '+checkedN+'</b>: для всех проверенных n &gt; N<sub>ε</sub> выполнено |x<sub>n</sub>−A| &lt; ε. Это визуальная проверка определения, а не замена доказательства.'+extra;
+    }
+  }
+
+  seq.addEventListener('change', ()=>setPreset(seq.value));
+  [eps,A,count].forEach((el)=>el.addEventListener('input',draw));
+  document.querySelectorAll('[data-preset]').forEach((b)=>b.addEventListener('click',()=>setPreset(b.dataset.preset)));
+  setPreset('inv');
+})();
+</script></body></html>
