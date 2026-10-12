@@ -1,6 +1,6 @@
 (function(global){
 'use strict';
-const C={package_version:'0.6.3',schema_version:1,workspace_width:12,workspace_height:8,robot_radius:0.22,risk_background:0.05,uncertainty_hard_factor:0.45,astar_grid_step:0.20,astar_margin:0.03,quadrature_h:0.03,quadrature_rel_tol:1e-3,dt:0.035,vmax:1.35,waypoint_stride:3,waypoint_tol:0.24,goal_tol:0.18,max_steps:8000,trajectory_record_stride:3};
+const C={package_version:'0.7.0',schema_version:1,workspace_width:12,workspace_height:8,robot_radius:0.22,risk_background:0.05,uncertainty_hard_factor:0.45,astar_grid_step:0.20,astar_margin:0.03,quadrature_h:0.03,quadrature_rel_tol:1e-3,dt:0.035,vmax:1.35,waypoint_stride:3,waypoint_tol:0.24,goal_tol:0.18,max_steps:8000,trajectory_record_stride:3};
 const hypot=Math.hypot;
 function risk(x,y,obs,s0=C.risk_background){let v=s0;for(const o of obs){const a=o.radius+o.sigma,dx=x-o.x,dy=y-o.y;v+=o.confidence*a*a/(dx*dx+dy*dy+a*a)}return v}
 function gradRisk(x,y,obs){let gx=0,gy=0;for(const o of obs){const a=o.radius+o.sigma,dx=x-o.x,dy=y-o.y,q=dx*dx+dy*dy+a*a,c=-2*o.confidence*a*a/(q*q);gx+=c*dx;gy+=c*dy}return [gx,gy]}
