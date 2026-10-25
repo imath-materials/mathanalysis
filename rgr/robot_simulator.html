@@ -37,7 +37,7 @@ button:hover{background:#f7f9fb} button:disabled{opacity:.5;cursor:not-allowed}
 button.primary{background:var(--accent);color:#fff;border-color:var(--accent)} button.primary:hover{background:#2d5073}
 button.secondary{background:var(--good-soft);border-color:#bfd6ca;color:#285744}
 .row{display:flex;gap:9px;flex-wrap:wrap;align-items:center}.row>*{min-width:0}
-.cols2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cols2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.cols3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .sep{border-top:1px solid var(--line);margin:15px 0}
 .formula{background:#fbfbfc;border-left:3px solid #9ca9b6;padding:10px 13px;margin:11px 0;min-width:0;font-size:15px}
 .formula mjx-container[jax="SVG"]{margin:.28em 0!important}
@@ -58,14 +58,14 @@ button.secondary{background:var(--good-soft);border-color:#bfd6ca;color:#285744}
 .math-label{color:#39414a}
 .footer{margin-top:16px;border-top:1px solid var(--line);padding-top:10px;color:var(--muted);font-size:12px}
 @media(max-width:900px){.grid{grid-template-columns:1fr}.metrics{grid-template-columns:1fr 1fr}}
-@media(max-width:520px){.app{padding:14px 10px 24px}.cols2,.metrics{grid-template-columns:1fr}.head h1{font-size:26px}.row button{width:100%}.formula{font-size:14px;padding:9px 10px}.file-row{align-items:stretch}.file-button{width:100%}}
+@media(max-width:520px){.app{padding:14px 10px 24px}.cols2,.cols3,.metrics{grid-template-columns:1fr}.head h1{font-size:26px}.row button{width:100%}.formula{font-size:14px;padding:9px 10px}.file-row{align-items:stretch}.file-button{width:100%}}
 </style></head>
 <body><main class="app"><a href="index.html" style="display:inline-block;margin-bottom:10px;color:#365f88;text-decoration:none;font-size:13px">← Главная страница РГР</a>
-<header class="head"><h1>Карта риска и движение робота</h1><p>Загрузите JSON варианта. A* и симулятор уже реализованы: используйте их как вычислительные инструменты для анализа маршрута и локального движения.</p></header>
+<header class="head"><h1>Карта риска и движение робота</h1><p>Загрузите JSON варианта, исследуйте влияние выходов модуля восприятия на A* и сравните локальное движение с вращательной составляющей и без неё.</p></header>
 <div class="grid">
 <section class="panel p16">
   <div class="tabs"><button class="tab active sim-control" data-layer="risk" type="button" disabled>Карта риска</button><button class="tab sim-control" data-layer="plain" type="button" disabled>Геометрия</button></div>
-  <div id="scenePending" class="scene-placeholder">Загрузите JSON своей пары, чтобы начать работу.</div>
+  <div id="scenePending" class="scene-placeholder">Загрузите JSON своей тройки, чтобы начать работу.</div>
   <div id="sceneWrap" class="scene" hidden><canvas id="cv" width="820" height="540" aria-label="Карта риска и траектории робота"></canvas></div>
   <div class="row" style="margin-top:11px"><button id="replan" class="primary sim-control" type="button" disabled>Пересчитать A*</button><button id="run" class="secondary sim-control" type="button" disabled>Запустить робота</button><button id="reset" class="sim-control" type="button" disabled>Сбросить</button></div>
   <div class="metrics">
@@ -74,10 +74,10 @@ button.secondary{background:var(--good-soft);border-color:#bfd6ca;color:#285744}
     <div class="metric"><div class="k">\(J_{A^*}\)</div><div class="v" id="mJ">—</div></div>
     <div class="metric"><div class="k">\(d_{\min}\) до препятствий</div><div class="v" id="mD">—</div></div>
   </div>
-  <div class="note" id="status" style="margin-top:12px" aria-live="polite">Загрузите JSON своей пары, чтобы начать работу.</div>
+  <div class="note" id="status" style="margin-top:12px" aria-live="polite">Загрузите JSON своей тройки, чтобы начать работу.</div>
 </section>
 <aside class="panel p18">
-  <div class="upload"><div class="control-label">JSON вашей пары</div><div class="file-row"><input id="file" class="visually-hidden" type="file" accept="application/json,.json"><label class="file-button" for="file">Выбрать JSON</label><span id="fileName" class="file-name">Файл не выбран</span></div><div class="row" style="margin-top:9px"><button id="demo" type="button">Открыть демонстрационный пример</button></div></div>
+  <div class="upload"><div class="control-label">JSON вашей тройки</div><div class="file-row"><input id="file" class="visually-hidden" type="file" accept="application/json,.json"><label class="file-button" for="file">Выбрать JSON</label><span id="fileName" class="file-name">Файл не выбран</span></div><div class="row" style="margin-top:9px"><button id="demo" type="button">Открыть демонстрационный пример</button></div></div>
   <div class="sep"></div><h3>Ключевое обнаружение</h3>
   <div class="cols2"><label><span class="math-label">\(p\)</span> — коэффициент доверия<input class="sim-control" id="p" type="text" inputmode="decimal" autocomplete="off" disabled></label><label><span class="math-label">\(\sigma\), м</span> — масштаб неопределённости<input class="sim-control" id="sig" type="text" inputmode="decimal" autocomplete="off" disabled></label></div>
   <div class="sep"></div><h3>Планирование и управление</h3>
@@ -112,8 +112,8 @@ function valid(s){return !!(s&&s.package_version===RGR.C.package_version&&s.sche
 function setReady(on){document.querySelectorAll('.sim-control').forEach(e=>e.disabled=!on);if(!on){$('run').disabled=true;$('reset').disabled=true;$('replan').disabled=true}}
 function clearResults(){path=sim=sim0=null;anim=false;frame=0;for(const id of ['mL','mI','mJ','mD'])$(id).textContent='—';$('cmp').innerHTML='';$('cfg').innerHTML='';$('wp').innerHTML='';$('sceneWrap').hidden=true;$('scenePending').hidden=false}
 function sync(auto=true){if(!scene)return;const k=scene.obstacles[scene.key_obstacle];$('p').value=fmt(k.confidence,2);$('sig').value=fmt(k.sigma,2);$('lam').value=fmt(scene.lambda_J,2);$('beta').value=fmt(scene.beta_s,3);$('om').value=fmt(scene.omega_abs,2);$('cfg').innerHTML=`Вариант <b>${scene.variant}</b><br>\\(h_g\\) = ${fmt(RGR.C.astar_grid_step,2)} м, \\(m_{\\rm plan}\\) = ${fmt(RGR.C.astar_margin,2)} м<br>\\(\\Delta t\\) = ${fmt(RGR.C.dt,3)} с, \\(v_{\\max}\\) = ${fmt(RGR.C.vmax,2)} м/с`;typeset($('cfg'));$('scenePending').hidden=true;$('sceneWrap').hidden=false;setReady(true);$('reset').disabled=false;if(auto)replan();else draw()}
-function loadScene(s,label,demo=false){if(!valid(s))throw new Error('JSON не соответствует схеме или канонической численной конфигурации комплекта.');baseScene=clone(s);scene=clone(s);sync(true);$('fileName').textContent=demo?'демонстрационный пример':label;$('status').innerHTML=demo?'Открыт <b>демонстрационный пример</b>. Для своей работы загрузите JSON пары.':'JSON загружен; A* и движение пересчитаны.'}
-function applyInputs(){if(!scene)throw new Error('Сначала загрузите JSON пары.');const k=scene.obstacles[scene.key_obstacle],vals=[parseRU($('p').value),parseRU($('sig').value),parseRU($('lam').value),parseRU($('beta').value),parseRU($('om').value)];if(vals.some(v=>!Number.isFinite(v)))throw new Error('Проверьте числовые поля: допускаются десятичная запятая и точка.');[k.confidence,k.sigma,scene.lambda_J,scene.beta_s,scene.omega_abs]=vals}
+function loadScene(s,label,demo=false){if(!valid(s))throw new Error('JSON не соответствует схеме или канонической численной конфигурации комплекта.');baseScene=clone(s);scene=clone(s);sync(true);$('fileName').textContent=demo?'демонстрационный пример':label;$('status').innerHTML=demo?'Открыт <b>демонстрационный пример</b>. Для своей работы загрузите JSON тройки.':'JSON загружен; A* и движение пересчитаны.'}
+function applyInputs(){if(!scene)throw new Error('Сначала загрузите JSON тройки.');const k=scene.obstacles[scene.key_obstacle],vals=[parseRU($('p').value),parseRU($('sig').value),parseRU($('lam').value),parseRU($('beta').value),parseRU($('om').value)];if(vals.some(v=>!Number.isFinite(v)))throw new Error('Проверьте числовые поля: допускаются десятичная запятая и точка.');[k.confidence,k.sigma,scene.lambda_J,scene.beta_s,scene.omega_abs]=vals}
 function replan(){if(!scene)return;anim=false;try{applyInputs()}catch(err){$('status').innerHTML='<span class="bad">'+String(err.message||err)+'</span>';return}path=RGR.astar(scene.start,scene.goal,scene.obstacles,scene.lambda_J);if(!path){sim=sim0=null;$('status').innerHTML='<span class="bad">A*: маршрут не найден для текущих параметров.</span>';$('cmp').innerHTML='';$('run').disabled=true;draw();return}const m=RGR.metrics(path,scene.obstacles,scene.lambda_J),key=scene.obstacles[scene.key_obstacle],omega=RGR.rotationSign(path,key)*scene.omega_abs;sim=RGR.simulate(scene,path,omega);sim0=RGR.simulate(scene,path,0);$('mL').textContent=fmt(m.length,3)+' м';$('mI').textContent=fmt(m.risk,3)+' м';$('mJ').textContent=fmt(m.cost,3)+' м';$('mD').textContent=fmt(m.clearance,3)+' м';$('status').innerHTML=`A* найден. Ключевое обнаружение обходится <b>${omega<0?'сверху':'снизу'}</b>; \\(\\omega=${texNum(omega,2)}\\,\\mathrm{m}^2/\\mathrm{s}\\). Относительное расхождение квадратуры: \\(\\varepsilon_I=${sciTex(m.quad_rel,2)}\\).`;typeset($('status'));const wp=RGR.waypoints(path);$('wp').innerHTML=wp.map((p,i)=>`<option value="${i}">T${i} = (${fmt(p[0],1)}; ${fmt(p[1],1)})</option>`).join('');$('wp').value=String(Math.min(10,wp.length-1));$('cmp').innerHTML=row('\\(\\omega=0\\)',sim0)+row('штатное \\(\\omega\\)',sim);typeset($('cmp'));frame=0;$('run').disabled=false;draw()}
 function row(name,d){return `<tr><td>${name}</td><td>${fmt(d.trajectory_length,3)}</td><td>${fmt(d.min_clearance,3)}</td><td>${d.steps}</td><td class="${d.reached&&!d.collided?'good':'bad'}">${d.reached&&!d.collided?'цель достигнута':d.collided?'столкновение':'цель не достигнута'}</td></tr>`}
 function xy(x,y){return [x/scene.workspace.width*cv.width,cv.height-y/scene.workspace.height*cv.height]}

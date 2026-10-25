@@ -37,7 +37,7 @@ button:hover{background:#f7f9fb} button:disabled{opacity:.5;cursor:not-allowed}
 button.primary{background:var(--accent);color:#fff;border-color:var(--accent)} button.primary:hover{background:#2d5073}
 button.secondary{background:var(--good-soft);border-color:#bfd6ca;color:#285744}
 .row{display:flex;gap:9px;flex-wrap:wrap;align-items:center}.row>*{min-width:0}
-.cols2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cols2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.cols3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .sep{border-top:1px solid var(--line);margin:15px 0}
 .formula{background:#fbfbfc;border-left:3px solid #9ca9b6;padding:10px 13px;margin:11px 0;min-width:0;font-size:15px}
 .formula mjx-container[jax="SVG"]{margin:.28em 0!important}
@@ -58,15 +58,16 @@ button.secondary{background:var(--good-soft);border-color:#bfd6ca;color:#285744}
 .math-label{color:#39414a}
 .footer{margin-top:16px;border-top:1px solid var(--line);padding-top:10px;color:var(--muted);font-size:12px}
 @media(max-width:900px){.grid{grid-template-columns:1fr}.metrics{grid-template-columns:1fr 1fr}}
-@media(max-width:520px){.app{padding:14px 10px 24px}.cols2,.metrics{grid-template-columns:1fr}.head h1{font-size:26px}.row button{width:100%}.formula{font-size:14px;padding:9px 10px}.file-row{align-items:stretch}.file-button{width:100%}}
+@media(max-width:520px){.app{padding:14px 10px 24px}.cols2,.cols3,.metrics{grid-template-columns:1fr}.head h1{font-size:26px}.row button{width:100%}.formula{font-size:14px;padding:9px 10px}.file-row{align-items:stretch}.file-button{width:100%}}
 </style></head>
 <body><main class="app"><a href="index.html" style="display:inline-block;margin-bottom:10px;color:#365f88;text-decoration:none;font-size:13px">← Главная страница РГР</a>
-<header class="head"><h1>Генератор варианта РГР</h1><p>Введите ИСУ двух участников. Пара получает одну из заранее проверенных сцен и JSON с исходными данными.</p></header>
+<header class="head"><h1>Генератор варианта РГР</h1><p>Введите ИСУ трёх участников. Тройка получает одну из заранее проверенных сцен и JSON с исходными данными.</p></header>
 <div class="grid">
 <section class="panel p18">
-  <div class="cols2">
+  <div class="cols3">
     <label class="control"><span class="control-label">ИСУ участника A</span><input id="a" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="123456"></label>
     <label class="control"><span class="control-label">ИСУ участника B</span><input id="b" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="654321"></label>
+    <label class="control"><span class="control-label">ИСУ участника C</span><input id="c" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="345678"></label>
   </div>
   <div class="row" style="margin-top:12px"><button id="go" class="primary" type="button">Получить вариант</button><button id="dl" class="secondary" type="button" disabled>Скачать JSON</button></div>
   <div id="msg" class="small" style="margin-top:9px" aria-live="polite">Порядок ИСУ не влияет на назначение варианта.</div>
@@ -96,10 +97,10 @@ const BANK=[{"project":"robot_perception_navigation","package_version":"0.7.0","
 const typeset=node=>window.MathJax&&MathJax.typesetPromise?MathJax.typesetPromise(node?[node]:undefined):Promise.resolve();
 const fmt=(v,d=2)=>new Intl.NumberFormat('ru-RU',{minimumFractionDigits:d,maximumFractionDigits:d,useGrouping:false}).format(v);
 function parseISU(v){const t=String(v||'').trim();return /^\d+$/.test(t)?Number(t):NaN}
-function variantOf(a,b){let x=BigInt(Math.min(a,b)),y=BigInt(Math.max(a,b));return Number((x*1000003n+y*9176n+x*y*17n)%120n)}
+function variantOf(a,b,c){const ids=[a,b,c].sort((u,v)=>u-v).map(BigInt),[x,y,z]=ids;return Number((x*1000003n+y*9176n+z*65537n+x*y*17n+x*z*31n+y*z*43n+x*y*z*7n)%120n)}
 function draw(v){const c=$('cv'),g=c.getContext('2d'),sx=c.width/v.workspace.width,sy=c.height/v.workspace.height,Y=y=>c.height-y*sy,sc=Math.min(sx,sy);g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);g.strokeStyle='#edf0f3';g.lineWidth=1;for(let x=0;x<=v.workspace.width;x++){g.beginPath();g.moveTo(x*sx,0);g.lineTo(x*sx,c.height);g.stroke()}for(let y=0;y<=v.workspace.height;y++){g.beginPath();g.moveTo(0,Y(y));g.lineTo(c.width,Y(y));g.stroke()}for(const o of v.obstacles){const hard=o.radius+v.workspace.robot_radius+v.solver_config.uncertainty_hard_factor*o.sigma;g.strokeStyle='#8b98a6';g.setLineDash([6,5]);g.beginPath();g.arc(o.x*sx,Y(o.y),hard*sc,0,Math.PI*2);g.stroke();g.setLineDash([]);g.fillStyle='rgba(182,93,85,.16)';g.strokeStyle='#a4544d';g.lineWidth=1.5;g.beginPath();g.arc(o.x*sx,Y(o.y),o.radius*sc,0,Math.PI*2);g.fill();g.stroke();g.fillStyle='#313840';g.font='13px system-ui';g.fillText(String(o.id),o.x*sx-4,Y(o.y)+4)}for(const [p,color,label] of [[v.start,'#3f7761','S'],[v.goal,'#927130','G']]){g.fillStyle=color;g.beginPath();g.arc(p[0]*sx,Y(p[1]),6,0,Math.PI*2);g.fill();g.font='600 13px system-ui';g.fillText(label,p[0]*sx+9,Y(p[1])-8)}}
 function info(v){let h=`<div><b>Вариант ${v.variant}</b></div><div class="sep"></div><table class="table"><thead><tr><th>обнаружение</th><th>\\(R_i\\), м</th><th>\\(p_i\\)</th><th>\\(\\sigma_i\\), м</th></tr></thead><tbody>`;for(const o of v.obstacles)h+=`<tr><td>${o.id}</td><td>${fmt(o.radius,2)}</td><td>${fmt(o.confidence,2)}</td><td>${fmt(o.sigma,2)}</td></tr>`;h+=`</tbody></table><div class="sep"></div><div>\\(\\lambda_J\\) = ${fmt(v.lambda_J,2)}<br>\\(k\\) = ${fmt(v.field_k,2)} с⁻¹<br>\\(\\beta_s\\) = ${fmt(v.beta_s,3)} м²/с<br>\\(|\\omega|\\) = ${fmt(v.omega_abs,2)} м²/с</div>`;$('info').innerHTML=h;typeset($('info'))}
-$('go').addEventListener('click',()=>{const a=parseISU($('a').value),b=parseISU($('b').value);if(!Number.isInteger(a)||!Number.isInteger(b)||a<=0||b<=0){$('msg').textContent='Введите два положительных целых номера ИСУ.';return}if(a===b){$('msg').textContent='ИСУ участника A и участника B должны различаться.';return}const n=variantOf(a,b);current=JSON.parse(JSON.stringify(BANK[n]));current.team_isu=[Math.min(a,b),Math.max(a,b)];$('msg').innerHTML=`Назначен вариант <b>${n}</b>. JSON содержит все параметры сцены и численной модели.`;$('dl').disabled=false;$('scenePending').hidden=true;$('sceneWrap').hidden=false;draw(current);info(current)});
+$('go').addEventListener('click',()=>{const a=parseISU($('a').value),b=parseISU($('b').value),c=parseISU($('c').value);if(!Number.isInteger(a)||!Number.isInteger(b)||!Number.isInteger(c)||a<=0||b<=0||c<=0){$('msg').textContent='Введите три положительных целых номера ИСУ.';return}const ids=[a,b,c].sort((u,v)=>u-v);if(new Set(ids).size!==3){$('msg').textContent='Все три номера ИСУ должны различаться.';return}const n=variantOf(a,b,c);current=JSON.parse(JSON.stringify(BANK[n]));current.team_isu=ids;$('msg').innerHTML=`Назначен вариант <b>${n}</b>. JSON содержит все параметры сцены и численной модели.`;$('dl').disabled=false;$('scenePending').hidden=true;$('sceneWrap').hidden=false;draw(current);info(current)});
 $('dl').addEventListener('click',()=>{if(!current)return;const blob=new Blob([JSON.stringify(current,null,2)],{type:'application/json'}),u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=`rgr_variant_${String(current.variant).padStart(3,'0')}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)});
 typeset();
 </script></body></html>
